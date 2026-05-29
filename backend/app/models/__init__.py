@@ -1,6 +1,4 @@
-from .job import Job
-from .candidate import Candidate
-from .interview import Interview
-from .message import Message
-
-__all__ = ["Job", "Candidate", "Interview", "Message"]
+from app.models.job import Job
+from app.models.candidate import Candidate
+from app.models.interview import Interview
+from app.models.message import Message
