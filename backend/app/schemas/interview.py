@@ -15,15 +15,15 @@ class InterviewUpdate(BaseModel):
     status: Optional[InterviewStatus] = None
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    overall_score: Optional[float] = None
+    overall_score: Optional[dict] = None
 
 class InterviewResponse(InterviewBase):
     id: int
     status: InterviewStatus
     started_at: Optional[datetime]
     completed_at: Optional[datetime]
-    overall_score: Optional[float]
-    
+    overall_score: Optional[dict]
+
     class Config:
         from_attributes = True
 
