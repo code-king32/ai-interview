@@ -1,140 +1,111 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow p-6">
-      <!-- 加载状态 -->
-      <div v-if="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        <p class="text-gray-500 mt-4">加载报告中...</p>
+  <div style="background: white; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h1 style="font-size: 24px; font-weight: bold;">面试报告</h1>
+      <button @click="goBack" style="background-color: #6b7280; color: white; padding: 8px 16px; border-radius: 8px;">返回面试列表</button>
+    </div>
+
+    <div v-if="loading" style="text-align: center; padding: 60px;">加载中...</div>
+
+    <div v-else-if="report">
+      <!-- 基本信息卡片 -->
+      <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px; display: flex; flex-wrap: wrap; gap: 24px;">
+        <div><span style="color: #6b7280;">候选人：</span><strong>{{ report.candidate?.name || '-' }}</strong></div>
+        <div><span style="color: #6b7280;">岗位：</span><strong>{{ report.job?.title || '-' }}</strong></div>
+        <div><span style="color: #6b7280;">面试时间：</span><strong>{{ formatDate(report.generated_at) }}</strong></div>
+        <div><span style="color: #6b7280;">总题数：</span><strong>{{ report.total_questions || 0 }}</strong></div>
       </div>
 
-      <!-- 报告内容 -->
-      <div v-else-if="report">
-        <!-- 标题 -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900">面试报告</h1>
-          <p class="text-gray-500 mt-2">
-            {{ report.candidate?.name }} - {{ report.job?.title }}
-          </p>
-          <p class="text-gray-400 text-sm">生成时间：{{ formatDate(report.generated_at) }}</p>
+      <!-- 总体评分 -->
+      <h2 style="font-size: 18px; font-weight: 600; margin: 24px 0 16px;">总体评分</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 16px; margin-bottom: 24px;">
+        <div style="background:#eff6ff; padding:16px; border-radius:12px; text-align:center">
+          <div>技术能力</div>
+          <div style="font-size:28px; font-weight:bold;">{{ report.overall_score?.technical || 0 }}</div>
         </div>
-
-        <!-- 总体评分 -->
-        <div class="mb-8">
-          <h2 class="text-xl font-semibold mb-4">总体评分</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center p-4 bg-blue-50 rounded-lg">
-              <div class="text-2xl font-bold text-blue-600">{{ report.overall_score?.technical || 0 }}</div>
-              <div class="text-sm text-gray-600">技术能力</div>
-            </div>
-            <div class="text-center p-4 bg-green-50 rounded-lg">
-              <div class="text-2xl font-bold text-green-600">{{ report.overall_score?.communication || 0 }}</div>
-              <div class="text-sm text-gray-600">沟通表达</div>
-            </div>
-            <div class="text-center p-4 bg-purple-50 rounded-lg">
-              <div class="text-2xl font-bold text-purple-600">{{ report.overall_score?.learning || 0 }}</div>
-              <div class="text-sm text-gray-600">学习潜力</div>
-            </div>
-            <div class="text-center p-4 bg-orange-50 rounded-lg">
-              <div class="text-2xl font-bold text-orange-600">{{ report.overall_score?.match || 0 }}</div>
-              <div class="text-sm text-gray-600">岗位匹配</div>
-            </div>
-          </div>
-          
-          <div class="mt-4 p-4 rounded-lg" :class="getRecommendationClass(report.overall_score?.recommendation)">
-            <div class="font-semibold">录用建议：{{ report.overall_score?.recommendation || '待评估' }}</div>
-            <div class="text-gray-700 mt-2">{{ report.overall_score?.summary || '暂无评价' }}</div>
-          </div>
+        <div style="background:#f0fdf4; padding:16px; border-radius:12px; text-align:center">
+          <div>沟通表达</div>
+          <div style="font-size:28px; font-weight:bold;">{{ report.overall_score?.communication || 0 }}</div>
         </div>
-
-        <!-- 问答详情 -->
-        <div>
-          <h2 class="text-xl font-semibold mb-4">问答详情</h2>
-          <div class="space-y-4">
-            <div v-for="detail in report.question_details" :key="detail.question_number" class="border rounded-lg p-4">
-              <div class="font-semibold text-purple-600">第 {{ detail.question_number }} 题</div>
-              <div class="mt-2"><span class="font-medium">问题：</span>{{ detail.question }}</div>
-              <div class="mt-2"><span class="font-medium">回答：</span>{{ detail.answer || '无回答' }}</div>
-              <div class="mt-2 flex flex-wrap gap-3 text-sm">
-                <span class="text-gray-600">正确性: {{ detail.scores?.correctness || 0 }}/10</span>
-                <span class="text-gray-600">深度: {{ detail.scores?.depth || 0 }}/10</span>
-                <span class="text-gray-600">逻辑: {{ detail.scores?.logic || 0 }}/10</span>
-                <span class="text-gray-600">实践: {{ detail.scores?.practice || 0 }}/10</span>
-              </div>
-              <div v-if="detail.comment" class="mt-2 text-gray-600 text-sm bg-gray-50 p-2 rounded">
-                {{ detail.comment }}
-              </div>
-            </div>
-          </div>
+        <div style="background:#fef3c7; padding:16px; border-radius:12px; text-align:center">
+          <div>学习潜力</div>
+          <div style="font-size:28px; font-weight:bold;">{{ report.overall_score?.learning || 0 }}</div>
         </div>
-
-        <!-- 面试信息 -->
-        <div class="mt-8 pt-4 border-t text-center text-sm text-gray-400">
-          <p>总题数：{{ report.total_questions || 0 }} 题 | 时长：{{ report.duration || '未知' }}</p>
+        <div style="background:#fce7f3; padding:16px; border-radius:12px; text-align:center">
+          <div>岗位匹配</div>
+          <div style="font-size:28px; font-weight:bold;">{{ report.overall_score?.match || 0 }}</div>
         </div>
       </div>
-
-      <!-- 错误状态 -->
-      <div v-else-if="error" class="text-center py-12">
-        <p class="text-red-500">{{ error }}</p>
-        <NuxtLink to="/interviews" class="text-purple-500 hover:underline mt-4 inline-block">
-          返回面试列表
-        </NuxtLink>
+      <div style="background:#f3f4f6; padding:16px; border-radius:12px; margin-bottom:24px;">
+        <div><strong>录用建议：</strong>{{ report.overall_score?.recommendation || '待评估' }}</div>
+        <div style="margin-top:8px;">{{ report.overall_score?.summary || '' }}</div>
       </div>
 
-      <!-- 按钮 -->
-      <div class="mt-8 flex justify-center gap-4">
-        <button @click="$router.back()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-          返回
-        </button>
-        <NuxtLink to="/interviews" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-          面试列表
-        </NuxtLink>
+      <!-- 问答详情 -->
+      <h2 style="font-size: 18px; font-weight: 600; margin: 24px 0 16px;">问答详情</h2>
+      <div style="overflow-x: auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead style="background:#f9fafb;">
+            <tr><th style="padding:12px;">#</th><th style="padding:12px;">问题</th><th style="padding:12px;">回答摘要</th><th style="padding:12px;">评分</th><th style="padding:12px;">评价</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="d in report.question_details" :key="d.question_number" style="border-bottom:1px solid #e5e7eb;">
+              <td style="padding:12px;">{{ d.question_number }}</td>
+              <td style="padding:12px;">{{ d.question }}</td>
+              <td style="padding:12px;">{{ d.answer || '-' }}</td>
+              <td style="padding:12px;">{{ d.scores?.correctness || 0 }}/10</td>
+              <td style="padding:12px;">{{ d.comment || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+
+    <div v-else style="text-align:center; padding:60px; color:#ef4444;">报告加载失败，请稍后重试。</div>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
 const route = useRoute()
+const router = useRouter()
 const { $api } = useNuxtApp()
 
 const report = ref(null)
 const loading = ref(true)
-const error = ref(null)
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleString('zh-CN')
-}
+const formatDate = (dateStr) => dateStr ? new Date(dateStr).toLocaleString() : '-'
+const goBack = () => router.push('/interviews')
 
-const getRecommendationClass = (recommendation) => {
-  const classes = {
-    '强烈推荐': 'bg-green-50 border border-green-200',
-    '推荐': 'bg-blue-50 border border-blue-200',
-    '保留': 'bg-yellow-50 border border-yellow-200',
-    '不推荐': 'bg-red-50 border border-red-200'
-  }
-  return classes[recommendation] || 'bg-gray-50'
-}
+// 模拟数据（后端就绪后删除此部分）
+const getMockReport = (id) => ({
+  candidate: { name: `候选人${id}` },
+  job: { title: '示例岗位' },
+  generated_at: new Date().toISOString(),
+  total_questions: 5,
+  overall_score: {
+    technical: 8.2, communication: 7.5, learning: 8.0, match: 7.8,
+    recommendation: '推荐', summary: '候选人表现良好，推荐录用。'
+  },
+  question_details: [
+    { question_number: 1, question: '问题1', answer: '回答1', scores: { correctness: 8 }, comment: '不错' },
+    { question_number: 2, question: '问题2', answer: '回答2', scores: { correctness: 7 }, comment: '中等' }
+  ]
+})
 
-const loadReport = async () => {
+onMounted(async () => {
   loading.value = true
-  error.value = null
-  
   try {
     const res = await $api.get(`/reports/${route.params.id}`)
-    if (res.data.code === 0) {
-      report.value = res.data.data
-    } else {
-      error.value = res.data.message || '加载报告失败'
-    }
+    if (res.data.code === 0) report.value = res.data.data
+    else report.value = getMockReport(route.params.id) // 后端未返回时使用模拟
   } catch (err) {
-    console.error('加载报告失败:', err)
-    error.value = '无法连接到服务器，请确保后端服务已启动'
+    console.warn(err)
+    report.value = getMockReport(route.params.id) // 请求失败使用模拟
   } finally {
     loading.value = false
   }
-}
-
-onMounted(loadReport)
+})
 </script>

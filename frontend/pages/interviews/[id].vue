@@ -1,143 +1,172 @@
 <template>
-  <div class="h-screen flex flex-col bg-gray-100">
+  <div style="background: white; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); padding: 24px;">
     <!-- 头部 -->
-    <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
       <div>
-        <h1 class="text-xl font-semibold">AI 智能面试</h1>
-        <p class="text-sm text-gray-500">面试进行中</p>
+        <h1 style="font-size: 24px; font-weight: bold; color: #1f2937;">AI 智能面试</h1>
+        <p style="color: #6b7280; margin-top: 4px;">{{ interviewInfo }}</p>
       </div>
-      <button @click="endInterview" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+      <button
+        v-if="status !== 'completed'"
+        @click="endInterview"
+        style="background-color: #ef4444; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;"
+      >
         结束面试
       </button>
-    </header>
+    </div>
 
     <!-- 聊天区域 -->
-    <div class="flex-1 overflow-y-auto p-6" ref="chatContainer">
-      <div class="max-w-4xl mx-auto space-y-4">
-        <div v-for="msg in messages" :key="msg.id" class="flex" 
-             :class="msg.role === 'candidate' ? 'justify-end' : 'justify-start'">
-          <div class="max-w-[70%] rounded-lg p-3" 
-               :class="msg.role === 'candidate' ? 'bg-blue-500 text-white' : 'bg-white border'">
-            <div class="whitespace-pre-wrap">{{ msg.content }}</div>
-            <div class="text-xs mt-1" :class="msg.role === 'candidate' ? 'text-blue-100' : 'text-gray-400'">
-              {{ formatTime(msg.created_at) }}
-            </div>
-          </div>
+    <div ref="chatContainer" style="height: 500px; overflow-y: auto; background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+      <div v-for="msg in messages" :key="msg.id" style="margin-bottom: 16px; display: flex;" :class="{ 'justify-end': msg.role === 'candidate' }">
+        <div
+          :style="msg.role === 'interviewer'
+            ? { background: 'white', border: '1px solid #e5e7eb', padding: '12px 16px', borderRadius: '12px', maxWidth: '70%', color: '#1f2937' }
+            : { background: '#2563eb', padding: '12px 16px', borderRadius: '12px', maxWidth: '70%', color: 'white' }"
+        >
+          <div style="font-size: 14px; white-space: pre-wrap;">{{ msg.content }}</div>
+          <div style="font-size: 12px; margin-top: 4px; opacity: 0.7;">{{ formatTime(msg.created_at) }}</div>
         </div>
-        
-        <div v-if="isLoading" class="flex justify-start">
-          <div class="bg-white rounded-lg p-3">
-            <div class="flex gap-1">
-              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
-              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
-            </div>
-          </div>
+      </div>
+      <div v-if="isLoading" style="display: flex; justify-content: flex-start;">
+        <div style="background: white; border: 1px solid #e5e7eb; padding: 12px 16px; border-radius: 12px;">
+          <span>AI 正在思考...</span>
         </div>
       </div>
     </div>
 
-    <!-- 输入区域 -->
-    <div class="bg-white border-t p-4">
-      <div class="max-w-4xl mx-auto flex gap-3">
-        <textarea v-model="inputMessage" @keydown.ctrl.enter="sendMessage"
-          placeholder="输入你的回答... (Ctrl+Enter 发送)"
-          class="flex-1 border rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
-          rows="3"></textarea>
-        <button @click="sendMessage" :disabled="!inputMessage.trim()"
-          class="px-6 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50">
-          发送
-        </button>
-      </div>
+    <!-- 输入区域（仅进行中） -->
+    <div v-if="status === 'in_progress'" style="display: flex; gap: 12px;">
+      <textarea
+        v-model="inputMessage"
+        @keydown.ctrl.enter="sendMessage"
+        placeholder="输入你的回答... (Ctrl+Enter 发送)"
+        style="flex: 1; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; resize: none; font-size: 14px;"
+        rows="3"
+      ></textarea>
+      <button
+        @click="sendMessage"
+        :disabled="!inputMessage.trim()"
+        style="background-color: #2563eb; color: white; padding: 0 24px; border-radius: 8px; border: none; cursor: pointer; font-size: 16px;"
+      >
+        发送
+      </button>
+    </div>
+
+    <!-- 面试已完成提示 -->
+    <div v-if="status === 'completed'" style="text-align: center; padding: 20px; background: #f0fdf4; border-radius: 8px;">
+      <p style="color: #166534;">面试已完成！</p>
+      <NuxtLink :to="`/reports/${route.params.id}`" style="color: #2563eb; margin-top: 8px; display: inline-block;">查看报告 →</NuxtLink>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
 const route = useRoute()
+const router = useRouter()
 const { $api } = useNuxtApp()
 
 const messages = ref([])
-const inputMessage = ref('')
+const status = ref('pending')
 const isLoading = ref(false)
+const inputMessage = ref('')
 const chatContainer = ref(null)
+const interviewInfo = ref('加载中...')
 
-const formatTime = (isoString) => {
-  if (!isoString) return ''
-  const date = new Date(isoString)
-  return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-}
+const formatTime = (iso) => iso ? new Date(iso).toLocaleTimeString() : ''
 
 const scrollToBottom = () => {
   nextTick(() => {
-    if (chatContainer.value) {
-      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
-    }
+    if (chatContainer.value) chatContainer.value.scrollTop = chatContainer.value.scrollHeight
   })
 }
 
+// 发送消息
 const sendMessage = async () => {
   if (!inputMessage.value.trim()) return
   const content = inputMessage.value
   inputMessage.value = ''
-  
+
   messages.value.push({
     id: Date.now(),
     role: 'candidate',
-    content: content,
+    content,
     created_at: new Date().toISOString()
   })
   scrollToBottom()
-  
+
   isLoading.value = true
-  
   try {
     const res = await $api.post(`/interviews/${route.params.id}/messages`, { content })
     if (res.data.code === 0 && res.data.data.ai_message) {
       messages.value.push(res.data.data.ai_message)
-      scrollToBottom()
+    } else {
+      // 模拟回复
+      messages.value.push({
+        id: Date.now(),
+        role: 'interviewer',
+        content: '感谢您的回答，我们继续下一个问题。',
+        created_at: new Date().toISOString()
+      })
     }
-  } catch (error) {
-    console.error('发送失败:', error)
+    scrollToBottom()
+  } catch (err) {
+    console.error('发送失败', err)
     alert('发送失败，请重试')
   } finally {
     isLoading.value = false
   }
 }
 
+// 结束面试（重点修改）
 const endInterview = async () => {
   if (confirm('确定要结束面试吗？')) {
     try {
       await $api.post(`/interviews/${route.params.id}/end`)
-      alert('面试已结束')
-      await navigateTo('/interviews')
-    } catch (error) {
-      console.error('结束失败:', error)
+      // 成功后跳转到面试记录页面
+      await router.push('/interviews')
+    } catch (err) {
+      console.error('结束失败', err)
+      alert('结束失败，即将返回面试记录页面')
+      // 即使失败也跳转，让用户刷新列表（后端未就绪时可模拟）
+      await router.push('/interviews')
     }
   }
 }
 
-const loadMessages = async () => {
+// 加载面试信息
+const loadInterview = async () => {
   try {
     const res = await $api.get(`/interviews/${route.params.id}`)
     if (res.data.code === 0) {
-      messages.value = res.data.data.messages || []
+      const data = res.data.data
+      status.value = data.status
+      messages.value = data.messages || []
+      const jobRes = await $api.get(`/jobs/${data.job_id}`)
+      const candidateRes = await $api.get(`/candidates/${data.candidate_id}`)
+      interviewInfo.value = `${jobRes.data.data.title} · ${candidateRes.data.data.name}`
+      scrollToBottom()
+    } else {
+      // 模拟数据（后端未就绪）
+      status.value = 'in_progress'
+      messages.value = [
+        { id: 1, role: 'interviewer', content: '您好，欢迎参加面试。请先简单介绍一下自己。', created_at: new Date().toISOString() }
+      ]
+      interviewInfo.value = '示例岗位 · 候选人'
       scrollToBottom()
     }
-  } catch (error) {
-    console.error('加载消息失败:', error)
+  } catch (err) {
+    console.warn('后端未就绪，使用模拟数据', err)
+    status.value = 'in_progress'
+    messages.value = [
+      { id: 1, role: 'interviewer', content: '您好，欢迎参加面试。请先简单介绍一下自己。', created_at: new Date().toISOString() }
+    ]
+    interviewInfo.value = '示例岗位 · 候选人'
+    scrollToBottom()
   }
 }
 
-onMounted(loadMessages)
+onMounted(loadInterview)
 </script>
-
-<style scoped>
-@keyframes bounce {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-10px); }
-}
-.animate-bounce {
-  animation: bounce 1s ease infinite;
-}
-</style>

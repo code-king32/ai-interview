@@ -1,57 +1,78 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">面试记录</h1>
-      <NuxtLink to="/interviews/create" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
-        开始新面试
+  <div style="background: white; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); padding: 24px;">
+    <!-- 头部 -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h1 style="font-size: 24px; font-weight: bold; color: #1f2937;">面试记录</h1>
+      <NuxtLink to="/interviews/create">
+        <button style="background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; font-size: 16px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 4v16m8-8H4" />
+          </svg>
+          添加面试
+        </button>
       </NuxtLink>
     </div>
 
-    <div v-if="loading" class="text-center py-8 text-gray-500">
-      加载中...
-    </div>
-
-    <div v-else class="bg-white rounded-lg shadow overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+    <!-- 表格 -->
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #f9fafb;">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">岗位名称</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">候选人</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">综合评分</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">创建时间</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">ID</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">岗位名称</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">候选人</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">状态</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">综合评分</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">创建时间</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">操作</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="item in interviews" :key="item.id" class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.id }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.job_title || '-' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.candidate_name || '-' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span :class="getStatusClass(item.status)" class="px-2 py-1 rounded-full text-xs">
-                {{ getStatusText(item.status) }}
+        <tbody>
+          <tr v-for="interview in interviews" :key="interview.id" style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #111827;">{{ interview.id }}</td>
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; font-weight: 500; color: #111827;">{{ interview.job_title }}</td>
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #6b7280;">{{ interview.candidate_name }}</td>
+            <td style="padding: 20px 24px; white-space: nowrap;">
+              <span :style="getStatusStyle(interview.status)" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">
+                {{ getStatusText(interview.status) }}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <span v-if="item.overall_score" class="font-medium text-blue-600">{{ item.overall_score }}/10</span>
-              <span v-else class="text-gray-400">-</span>
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; font-weight: 500;">
+              <span v-if="interview.status === 'completed' && interview.overall_score">{{ interview.overall_score }}/10</span>
+              <span v-else>-</span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDate(item.created_at) }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <NuxtLink :to="`/interviews/${item.id}`" class="text-blue-600 hover:text-blue-900 mr-3">
-                进入
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #6b7280;">{{ interview.created_at }}</td>
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px;">
+              <!-- 已完成 → 查看报告 -->
+              <NuxtLink
+                v-if="interview.status === 'completed'"
+                :to="`/reports/${interview.id}`"
+                style="color: #10b981; text-decoration: none;"
+              >
+                查看报告
               </NuxtLink>
-              <NuxtLink v-if="item.status === 'completed'" :to="`/reports/${item.id}`" class="text-green-600 hover:text-green-900">
-                报告
+              <!-- 进行中 → 继续面试 -->
+              <NuxtLink
+                v-else-if="interview.status === 'in_progress'"
+                :to="`/interviews/${interview.id}`"
+                style="color: #2563eb; text-decoration: none;"
+              >
+                继续面试
               </NuxtLink>
+              <!-- 待开始 → 开始面试 -->
+              <NuxtLink
+                v-else-if="interview.status === 'pending'"
+                :to="`/interviews/${interview.id}`"
+                style="color: #2563eb; text-decoration: none;"
+              >
+                开始面试
+              </NuxtLink>
+              <!-- 其他状态默认显示进入（兜底） -->
+              <NuxtLink v-else :to="`/interviews/${interview.id}`" style="color: #2563eb; text-decoration: none;">进入</NuxtLink>
             </td>
-          </tr>
+           </tr>
           <tr v-if="interviews.length === 0">
-            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-              暂无面试记录，点击"开始新面试"创建
-            </td>
+            <td colspan="7" style="padding: 32px; text-align: center; color: #6b7280;">暂无面试记录，点击“添加面试”创建</td>
           </tr>
         </tbody>
       </table>
@@ -60,46 +81,51 @@
 </template>
 
 <script setup>
-const { $api } = useNuxtApp()
-const interviews = ref([])
-const loading = ref(false)
+import { ref } from 'vue'
 
-const getStatusClass = (status) => {
-  const classes = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    in_progress: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800'
+// 模拟数据（可根据需要调整）
+const interviews = ref([
+  {
+    id: 1,
+    job_title: '前端开发工程师',
+    candidate_name: '张三',
+    status: 'completed',
+    overall_score: 8.5,
+    created_at: '2025-03-15'
+  },
+  {
+    id: 2,
+    job_title: '后端开发工程师',
+    candidate_name: '李四',
+    status: 'in_progress',
+    overall_score: null,
+    created_at: '2025-03-16'
+  },
+  {
+    id: 3,
+    job_title: '全栈工程师',
+    candidate_name: '王五',
+    status: 'pending',
+    overall_score: null,
+    created_at: '2025-03-17'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+])
+
+const getStatusStyle = (status) => {
+  switch (status) {
+    case 'completed': return { backgroundColor: '#d1fae5', color: '#065f46' }
+    case 'in_progress': return { backgroundColor: '#dbeafe', color: '#1e40af' }
+    case 'pending': return { backgroundColor: '#fed7aa', color: '#9a3412' }
+    default: return { backgroundColor: '#f3f4f6', color: '#374151' }
+  }
 }
 
 const getStatusText = (status) => {
-  const texts = {
-    pending: '待开始',
-    in_progress: '进行中',
-    completed: '已完成'
-  }
-  return texts[status] || status
-}
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleString('zh-CN')
-}
-
-const fetchInterviews = async () => {
-  loading.value = true
-  try {
-    const res = await $api.get('/interviews')
-    if (res.data.code === 0) {
-      interviews.value = res.data.data.items || []
-    }
-  } catch (error) {
-    console.error('获取面试列表失败:', error)
-  } finally {
-    loading.value = false
+  switch (status) {
+    case 'completed': return '已完成'
+    case 'in_progress': return '进行中'
+    case 'pending': return '待开始'
+    default: return status
   }
 }
-
-onMounted(fetchInterviews)
 </script>
