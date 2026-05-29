@@ -80,45 +80,37 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+const { $api } = useNuxtApp()
+const interviews = ref<any[]>([])
+const loading = ref(true)
 
-// 模拟数据（可根据需要调整）
-const interviews = ref([
-  {
-    id: 1,
-    job_title: '前端开发工程师',
-    candidate_name: '张三',
-    status: 'completed',
-    overall_score: 8.5,
-    created_at: '2025-03-15'
-  },
-  {
-    id: 2,
-    job_title: '后端开发工程师',
-    candidate_name: '李四',
-    status: 'in_progress',
-    overall_score: null,
-    created_at: '2025-03-16'
-  },
-  {
-    id: 3,
-    job_title: '全栈工程师',
-    candidate_name: '王五',
-    status: 'pending',
-    overall_score: null,
-    created_at: '2025-03-17'
-  }
-])
-
-const getStatusStyle = (status) => {
+const getStatusStyle = (status: string) => {
   switch (status) {
-    case 'completed': return { backgroundColor: '#d1fae5', color: '#065f46' }
-    case 'in_progress': return { backgroundColor: '#dbeafe', color: '#1e40af' }
-    case 'pending': return { backgroundColor: '#fed7aa', color: '#9a3412' }
+    case 'completed': case 'COMPLETED': return { backgroundColor: '#d1fae5', color: '#065f46' }
+    case 'in_progress': case 'IN_PROGRESS': return { backgroundColor: '#dbeafe', color: '#1e40af' }
+    case 'pending': case 'PENDING': return { backgroundColor: '#fed7aa', color: '#9a3412' }
     default: return { backgroundColor: '#f3f4f6', color: '#374151' }
   }
 }
+const statusText = (s: string) => ({pending:'待开始',PENDING:'待开始',in_progress:'进行中',IN_PROGRESS:'进行中',completed:'已完成',COMPLETED:'已完成'})[s]||s
+const scoreVal = (s: any) => {
+  if (!s) return '-'
+  if (typeof s === 'object') return ((s.overall || s.technical || 0) as number).toFixed(1)
+  return Number(s).toFixed(1)
+}
+const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString('zh-CN') : '-'
+
+const fetchInterviews = async () => {
+  loading.value = true
+  try {
+    const res = await $api.get('/interviews')
+    interviews.value = res.data.data || []
+  } catch (e) { console.error(e) }
+  finally { loading.value = false }
+}
+
+onMounted(fetchInterviews)
 
 const getStatusText = (status) => {
   switch (status) {

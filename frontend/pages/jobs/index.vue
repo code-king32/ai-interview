@@ -84,23 +84,26 @@ const openEditModal = (job) => {
   modalVisible.value = true
 }
 const closeModal = () => { modalVisible.value = false }
-const submitForm = () => {
+const { $api } = useNuxtApp()
+
+const submitForm = async () => {
   if (!form.value.title.trim()) return alert('请填写岗位名称')
-  if (isEdit.value) {
-    const index = jobs.value.findIndex(j => j.id === form.value.id)
-    if (index !== -1) jobs.value[index] = { ...form.value }
-    alert('更新成功')
-  } else {
-    const newId = jobs.value.length ? Math.max(...jobs.value.map(j => j.id)) + 1 : 1
-    jobs.value.push({ id: newId, ...form.value, created_at: new Date().toISOString().slice(0,10) })
-    alert('创建成功')
-  }
-  closeModal()
+  try {
+    if (isEdit.value) {
+      await $api.put(`/jobs/${form.value.id}`, { title: form.value.title, description: form.value.description, requirements: form.value.requirements })
+    } else {
+      await $api.post('/jobs', { title: form.value.title, description: form.value.description, requirements: form.value.requirements })
+    }
+    closeModal()
+    await fetchJobs()
+  } catch (e) { alert('操作失败，请确保后端服务已启动') }
 }
-const deleteJob = (id) => {
-  if (confirm('确定删除该岗位吗？')) {
-    jobs.value = jobs.value.filter(j => j.id !== id)
-    alert('删除成功')
-  }
+
+const deleteJob = async (id) => {
+  if (!confirm('确定删除该岗位吗？')) return
+  try {
+    await $api.delete(`/jobs/${id}`)
+    await fetchJobs()
+  } catch (e) { alert('删除失败') }
 }
 </script>

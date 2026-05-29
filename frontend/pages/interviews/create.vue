@@ -48,21 +48,20 @@ const selectedCandidateId = ref('')
 const fetchJobs = async () => {
   try {
     const res = await $api.get('/jobs')
-    if (res.data.code === 0) jobs.value = res.data.data.items || []
+    jobs.value = res.data.data?.items || res.data.data || []
   } catch (err) {
-    console.warn('获取岗位失败，使用模拟数据', err)
-    // 模拟数据（可选）
-    jobs.value = [{ id: 1, title: '前端开发工程师' }, { id: 2, title: '后端开发工程师' }]
+    console.error('获取岗位失败', err)
+    alert('无法连接后端服务，请确认服务已启动')
   }
 }
 
 const fetchCandidates = async () => {
   try {
     const res = await $api.get('/candidates')
-    if (res.data.code === 0) candidates.value = res.data.data.items || []
+    candidates.value = res.data.data?.items || res.data.data || []
   } catch (err) {
-    console.warn('获取候选人失败，使用模拟数据', err)
-    candidates.value = [{ id: 1, name: '张三' }, { id: 2, name: '李四' }]
+    console.error('获取候选人失败', err)
+    alert('无法连接后端服务，请确认服务已启动')
   }
 }
 

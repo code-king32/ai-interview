@@ -107,28 +107,29 @@ const closeModal = () => {
   modalVisible.value = false
 }
 
-const submitForm = () => {
+const { $api } = useNuxtApp()
+
+const submitForm = async () => {
   if (!form.value.name.trim()) return alert('请填写姓名')
-  if (isEdit.value) {
-    const index = candidates.value.findIndex(c => c.id === form.value.id)
-    if (index !== -1) candidates.value[index] = { ...form.value }
-    alert('更新成功')
-  } else {
-    const newId = candidates.value.length ? Math.max(...candidates.value.map(c => c.id)) + 1 : 1
-    candidates.value.push({
-      id: newId,
-      ...form.value,
-      created_at: new Date().toISOString().slice(0, 10)
-    })
-    alert('创建成功')
-  }
-  closeModal()
+  try {
+    if (isEdit.value) {
+      await $api.put(`/candidates/${form.value.id}`, { name: form.value.name, email: form.value.email, phone: form.value.phone })
+    } else {
+      const body: any = { name: form.value.name }
+      if (form.value.email) body.email = form.value.email
+      if (form.value.phone) body.phone = form.value.phone
+      await $api.post('/candidates', body)
+    }
+    closeModal()
+    await fetchCandidates()
+  } catch (e) { alert('操作失败，请确保后端服务已启动') }
 }
 
-const deleteCandidate = (id) => {
-  if (confirm('确定删除该候选人吗？')) {
-    candidates.value = candidates.value.filter(c => c.id !== id)
-    alert('删除成功')
-  }
+const deleteCandidate = async (id) => {
+  if (!confirm('确定删除该候选人吗？')) return
+  try {
+    await $api.delete(`/candidates/${id}`)
+    await fetchCandidates()
+  } catch (e) { alert('删除失败') }
 }
 </script>
