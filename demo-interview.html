@@ -5,1079 +5,479 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI 智能面试系统</title>
 <style>
-/* ═══════════════════════════════════════════════════════════════ */
-/*  FONTS                                                       */
-/* ═══════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* ═══════════════════════════════════════════════════════════ */
+/*  RESET & TOKENS                                            */
+/* ═══════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FFFFFF;--bg2:#F8F9FA;--text:#1A1A1A;--text2:#6B7280;--accent:#4F46E5;
+  --accent-hover:#4338CA;--success:#10B981;--border:#E5E7EB;
+  --shadow:0 1px 2px rgba(0,0,0,0.04),0 4px 16px rgba(0,0,0,0.04);
+  --shadow-hover:0 1px 2px rgba(0,0,0,0.06),0 8px 32px rgba(0,0,0,0.08);
+  --ease:cubic-bezier(0.16,1,0.3,1);--spring:cubic-bezier(0.34,1.56,0.64,1);
+  --font:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.6;letter-spacing:-0.011em;min-height:100vh}
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  RESET & VARIABLES                                           */
-/* ═══════════════════════════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ═══════════════════════════════════════════════════════════ */
+/*  VIEW SYSTEM                                               */
+/* ═══════════════════════════════════════════════════════════ */
+.view{display:none;animation:viewIn .45s var(--ease)}
+.view.active{display:flex}
+@keyframes viewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-:root {
-  --bg:               #FAFAFA;
-  --surface:          #FFFFFF;
-  --surface-secondary:#F5F5F7;
-  --surface-tertiary: #EEEEF2;
-  --text:             #18181B;
-  --text-secondary:   #6B7280;
-  --text-tertiary:    #9CA3AF;
-  --accent:           #5C5CEA;
-  --accent-hover:     #4B4BD8;
-  --accent-soft:      rgba(92,92,234,0.06);
-  --accent-medium:    rgba(92,92,234,0.12);
-  --accent-glow:      rgba(92,92,234,0.25);
-  --success:          #10B981;
-  --success-soft:     rgba(16,185,129,0.08);
-  --warning:          #F59E0B;
-  --warning-soft:     rgba(245,158,11,0.08);
-  --red:              #EF4444;
-  --red-soft:         rgba(239,68,68,0.06);
-  --border:           #E8E8ED;
-  --border-light:     #F0F0F3;
-  --radius-xl:        20px;
-  --radius-lg:        14px;
-  --radius-md:        10px;
-  --radius-sm:        8px;
-  --radius-full:      9999px;
-  --shadow-xs:        0 1px 2px rgba(0,0,0,0.03);
-  --shadow-sm:        0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
-  --shadow-md:        0 4px 6px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.03);
-  --shadow-lg:        0 10px 25px rgba(0,0,0,0.06), 0 4px 10px rgba(0,0,0,0.04);
-  --shadow-xl:        0 20px 50px rgba(0,0,0,0.08), 0 8px 20px rgba(0,0,0,0.04);
-  --ease-out:         cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring:      cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth:      cubic-bezier(0.4, 0, 0.2, 1);
-  --font:             'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+/* ═══════════════════════════════════════════════════════════ */
+/*  BUTTONS                                                   */
+/* ═══════════════════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 24px;border-radius:8px;font-size:15px;font-weight:500;
+  font-family:var(--font);border:none;cursor:pointer;transition:all .2s;outline:none
 }
+.btn-primary{background:var(--accent);color:#FFF}
+.btn-primary:hover{background:var(--accent-hover);box-shadow:0 4px 12px rgba(79,70,229,.3)}
+.btn-secondary{background:var(--bg);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
 
-html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+/* ═══════════════════════════════════════════════════════════ */
+/*  SETUP VIEW                                                */
+/* ═══════════════════════════════════════════════════════════ */
+#setup{align-items:center;justify-content:center;padding:40px 20px;background:var(--bg2);min-height:100vh}
+.setup-card{background:var(--bg);border-radius:12px;box-shadow:var(--shadow);padding:48px;max-width:720px;width:100%}
+.setup-card h1{font-size:28px;font-weight:600;letter-spacing:-0.02em;margin-bottom:4px}
+.setup-card .sub{color:var(--text2);font-size:15px;margin-bottom:36px}
+.fg{margin-bottom:24px}
+.fg label{display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:8px}
+.fg textarea{width:100%;border:1px solid var(--border);border-radius:8px;background:#FAFAFA;padding:12px 16px;font-size:15px;line-height:1.6;font-family:var(--font);resize:vertical;min-height:120px;outline:none;transition:border-color .2s,box-shadow .2s}
+.fg textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.char-hint{text-align:right;font-size:12px;color:var(--text2);margin-top:4px}
 
-body {
-  font-family: var(--font);
-  color: var(--text);
-  background: var(--bg);
-  line-height: 1.6;
-  letter-spacing: -0.011em;
-  min-height: 100vh;
-}
+/* ═══════════════════════════════════════════════════════════ */
+/*  INTERVIEW VIEW                                            */
+/* ═══════════════════════════════════════════════════════════ */
+#interview{flex-direction:column;height:100vh;background:var(--bg)}
+.i-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--bg);border-bottom:.5px solid var(--border);flex-shrink:0}
+.i-hdr-l{display:flex;align-items:center;gap:12px}
+.i-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:dotPulse 2s ease infinite}@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.25}}
+.i-prog{font-size:14px;font-weight:500;color:var(--text)}
+.i-end-btn{font-size:14px;color:var(--text2);cursor:pointer;padding:6px 12px;border-radius:6px;border:none;background:transparent;font-family:var(--font);transition:all .2s}
+.i-end-btn:hover{color:#EF4444;background:rgba(239,68,68,.06)}
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  VIEW CONTAINER                                               */
-/* ═══════════════════════════════════════════════════════════════ */
-.view {
-  display: none;
-  min-height: 100vh;
-  animation: viewSlideIn 0.45s var(--ease-out);
-}
-.view.active { display: flex; }
-@keyframes viewSlideIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* Chat */
+.chat-wrap{flex:1;overflow-y:auto;padding:24px;scroll-behavior:smooth}
+.chat-inner{max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  BUTTON COMPONENT                                             */
-/* ═══════════════════════════════════════════════════════════════ */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 13px 24px; border-radius: var(--radius-md); font-size: 15px;
-  font-weight: 500; font-family: var(--font); border: none; cursor: pointer;
-  transition: all 0.2s var(--ease-out); outline: none;
-  position: relative; letter-spacing: -0.01em; white-space: nowrap;
-  -webkit-user-select: none; user-select: none;
-}
-.btn-primary {
-  background: var(--accent); color: #FFF;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 4px 12px var(--accent-glow);
-}
-.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 8px 24px var(--accent-glow); }
-.btn-primary:active { transform: translateY(0) scale(0.995); }
-.btn-secondary {
-  background: var(--surface); color: var(--text); border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
-}
-.btn-secondary:hover { background: var(--surface-secondary); box-shadow: var(--shadow-sm); }
-.btn-ghost {
-  background: transparent; color: var(--text-secondary); padding: 8px 14px; border-radius: var(--radius-sm);
-}
-.btn-ghost:hover { background: var(--surface-secondary); color: var(--text); }
-.btn-danger { background: transparent; color: var(--text-secondary); padding: 8px 14px; border-radius: var(--radius-sm); }
-.btn-danger:hover { background: var(--red-soft); color: var(--red); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none;
-  transform: none !important; box-shadow: none !important; }
-.btn-lg { padding: 15px 32px; font-size: 16px; border-radius: var(--radius-lg); }
-.btn-full { width: 100%; }
-
-/* ═══════════════════════════════════════════════════════════════ */
-/*  SETUP VIEW                                                   */
-/* ═══════════════════════════════════════════════════════════════ */
-#setup {
-  align-items: center; justify-content: center;
-  padding: 40px 20px;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(92,92,234,0.04) 0%, transparent 100%),
-    var(--bg);
-}
-.setup-wrapper { width: 100%; max-width: 680px; }
-
-/* Brand strip */
-.brand-strip {
-  text-align: center; margin-bottom: 36px;
-}
-.brand-icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 52px; height: 52px; border-radius: 16px;
-  background: linear-gradient(135deg, #5C5CEA 0%, #7C3AED 100%);
-  box-shadow: 0 8px 32px rgba(92,92,234,0.3);
-  margin-bottom: 20px;
-}
-.brand-icon svg { width: 26px; height: 26px; }
-.brand-strip h1 {
-  font-size: 30px; font-weight: 700; letter-spacing: -0.025em;
-  background: linear-gradient(135deg, #18181B 0%, #3F3F46 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 8px;
-}
-.brand-strip .brand-sub {
-  font-size: 15px; color: var(--text-secondary); line-height: 1.6;
-}
-
-/* Form card */
-.form-card {
-  background: var(--surface); border-radius: var(--radius-xl);
-  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
-  padding: 40px;
-}
-.form-group { margin-bottom: 26px; }
-.form-group:last-of-type { margin-bottom: 32px; }
-.form-label {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 8px;
-}
-.form-label span { font-size: 13px; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.04em; }
-.form-label .optional { font-size: 12px; color: var(--text-tertiary); font-weight: 400; text-transform: none; letter-spacing: 0; }
-.form-textarea {
-  width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-md);
-  background: var(--surface-secondary); padding: 14px 16px;
-  font-size: 15px; line-height: 1.65; font-family: var(--font);
-  resize: vertical; min-height: 130px; max-height: 300px;
-  transition: all 0.2s var(--ease-out); outline: none; color: var(--text);
-  letter-spacing: -0.005em;
-}
-.form-textarea::placeholder { color: var(--text-tertiary); }
-.form-textarea:focus {
-  border-color: var(--accent); background: var(--surface);
-  box-shadow: 0 0 0 4px var(--accent-soft);
-}
-.form-footer {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-}
-.char-hint { font-size: 12px; color: var(--text-tertiary); }
-
-/* Divider */
-.divider {
-  display: flex; align-items: center; gap: 16px; margin: 32px 0;
-  color: var(--text-tertiary); font-size: 12px; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.05em;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border-light);
-}
-
-/* Setup tips */
-.setup-tips { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 0; margin-bottom: 32px; }
-.tip-chip {
-  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
-  background: var(--surface-secondary); border-radius: var(--radius-md);
-  font-size: 13px; color: var(--text-secondary); line-height: 1.4;
-  border: 1px solid transparent; transition: all 0.2s var(--ease-out);
-}
-.tip-chip:hover { border-color: var(--border); background: var(--surface); }
-.tip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.tip-dot.jd { background: var(--accent); }
-.tip-dot.cv { background: var(--success); }
-
-/* ═══════════════════════════════════════════════════════════════ */
-/*  INTERVIEW VIEW                                               */
-/* ═══════════════════════════════════════════════════════════════ */
-#interview { flex-direction: column; height: 100vh; background: var(--surface); }
-
-/* Header bar */
-.i-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 24px; background: var(--surface); flex-shrink: 0;
-  border-bottom: 1px solid var(--border-light);
-  backdrop-filter: blur(12px); z-index: 10;
-}
-.i-header-left {
-  display: flex; align-items: center; gap: 14px;
-}
-.i-live-dot {
-  width: 9px; height: 9px; border-radius: 50%; background: var(--success);
-  box-shadow: 0 0 0 4px var(--success-soft);
-  animation: livePulse 2s ease infinite;
-}
-@keyframes livePulse {
-  0%, 100% { box-shadow: 0 0 0 4px var(--success-soft); }
-  50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
-}
-.i-progress {
-  font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.005em;
-}
-.i-progress-sub {
-  font-size: 11px; color: var(--text-tertiary); font-weight: 400; margin-left: 6px;
-}
-.i-header-right { display: flex; align-items: center; gap: 8px; }
-.i-topic-badge {
-  font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: var(--radius-full);
-  background: var(--accent-soft); color: var(--accent); letter-spacing: 0.01em;
-}
-
-/* Chat area */
-.chat-area {
-  flex: 1; overflow-y: auto; padding: 32px 24px;
-  background:
-    radial-gradient(ellipse 60% 60% at 50% 0%, rgba(92,92,234,0.015) 0%, transparent 100%),
-    var(--surface);
-  scroll-behavior: smooth;
-}
-.chat-inner { max-width: 740px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
-
-/* Message bubbles */
-.msg {
-  display: flex; gap: 12px; max-width: 72%;
-  animation: msgPopIn 0.45s var(--ease-spring);
-  animation-fill-mode: both;
-}
-@keyframes msgPopIn {
-  from { opacity: 0; transform: scale(0.94) translateY(16px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.msg:nth-child(2) { animation-delay: 0s; }
-.msg:nth-child(3) { animation-delay: 0.05s; }
-.msg.ai { align-self: flex-start; }
-.msg.user { align-self: flex-end; flex-direction: row-reverse; }
-
-.msg-avatar {
-  width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  margin-top: 2px;
-}
-.msg.ai .msg-avatar {
-  background: var(--surface-secondary); border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-xs);
-}
-.msg.user .msg-avatar {
-  background: linear-gradient(135deg, #5C5CEA 0%, #7C3AED 100%);
-  box-shadow: 0 4px 12px var(--accent-glow);
-}
-.msg-body { min-width: 0; }
-.msg-bubble {
-  padding: 14px 18px; font-size: 14.5px; line-height: 1.65;
-  letter-spacing: -0.005em; position: relative; word-break: break-word;
-}
-.msg.ai .msg-bubble {
-  background: var(--surface-secondary); color: var(--text);
-  border-radius: 4px 18px 18px 18px;
-}
-.msg.user .msg-bubble {
-  background: var(--accent); color: #FFF;
-  border-radius: 18px 4px 18px 18px;
-}
-.msg-meta {
-  display: flex; align-items: center; gap: 8px; margin-top: 5px; padding: 0 6px;
-}
-.msg.user .msg-meta { justify-content: flex-end; }
-.msg-time { font-size: 11px; color: var(--text-tertiary); font-weight: 400; }
-.msg-score-pill {
-  font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full);
-  background: var(--success-soft); color: var(--success);
-}
+/* Messages */
+.msg{display:flex;gap:12px;max-width:70%;animation:msgIn .4s var(--spring) both}
+@keyframes msgIn{from{opacity:0;transform:scale(.94) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.msg.ai{align-self:flex-start}.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg-av{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px solid var(--border);margin-top:2px}
+.msg.user .msg-av{background:var(--accent);border-color:var(--accent)}
+.msg-bub{padding:14px 18px;font-size:15px;line-height:1.6;word-break:break-word}
+.msg.ai .msg-bub{background:#F3F4F6;color:#1F2937;border-radius:4px 16px 16px 16px}
+.msg.user .msg-bub{background:var(--accent);color:#FFF;border-radius:16px 4px 16px 16px}
+.msg-time{font-size:11px;color:var(--text2);margin-top:4px;padding:0 4px}
+.msg.user .msg-time{text-align:right}
 
 /* System msg */
-.msg.system {
-  align-self: center; max-width: 100%; animation: msgPopIn 0.4s var(--ease-out);
-}
-.msg.system .msg-bubble {
-  background: var(--accent-soft); color: var(--accent);
-  border-radius: var(--radius-full);
-  text-align: center; padding: 10px 22px; font-size: 13px; font-weight: 500;
-}
+.msg.sys{align-self:center;max-width:100%}
+.msg.sys .msg-bub{background:rgba(79,70,229,.06);color:var(--accent);border-radius:8px;font-size:13px;text-align:center;padding:10px 24px}
 
-/* Thinking dots */
-.thinking-dots { display: flex; gap: 4px; padding: 4px 0; }
-.thinking-dots span {
-  width: 7px; height: 7px; border-radius: 50%; background: var(--text-tertiary);
-  animation: thinkBounce 1.2s ease infinite;
-}
-.thinking-dots span:nth-child(2) { animation-delay: 0.15s; }
-.thinking-dots span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes thinkBounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
-  30% { transform: translateY(-8px); opacity: 1; }
-}
+/* Typing */
+.type-cursor{display:inline-block;width:2px;height:15px;background:var(--text2);margin-left:2px;vertical-align:text-bottom;animation:blink .8s step-end infinite}@keyframes blink{50%{opacity:0}}
 
-/* Cursor blink */
-.cursor-blink {
-  display: inline-block; width: 1.5px; height: 16px; background: var(--text-secondary);
-  margin-left: 2px; vertical-align: text-bottom; animation: blink 0.75s step-end infinite;
-}
-@keyframes blink { 50% { opacity: 0; } }
+/* Thinking */
+.think-dots{display:flex;gap:4px;padding:4px 0}
+.think-dots span{width:7px;height:7px;border-radius:50%;background:#D1D5DB;animation:thinkBounce 1.2s ease infinite}
+.think-dots span:nth-child(2){animation-delay:.15s}.think-dots span:nth-child(3){animation-delay:.3s}
+@keyframes thinkBounce{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-8px);opacity:1}}
 
-/* Input area */
-.input-area {
-  padding: 16px 24px 20px; background: var(--surface); flex-shrink: 0;
-  border-top: 1px solid var(--border-light);
-}
-.input-wrap {
-  max-width: 740px; margin: 0 auto;
-  display: flex; align-items: flex-end; gap: 10px;
-  background: var(--surface-secondary); border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg); padding: 8px 8px 8px 18px;
-  transition: all 0.25s var(--ease-out);
-}
-.input-wrap:focus-within {
-  border-color: var(--accent); background: var(--surface);
-  box-shadow: 0 0 0 5px var(--accent-soft);
-}
-.input-wrap textarea {
-  flex: 1; border: none; background: transparent; font-size: 15px;
-  font-family: var(--font); line-height: 1.5; resize: none; outline: none;
-  max-height: 80px; padding: 6px 0; color: var(--text); letter-spacing: -0.005em;
-}
-.input-wrap textarea::placeholder { color: var(--text-tertiary); }
-.send-btn {
-  width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
-  background: var(--accent); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s var(--ease-out); color: #FFF;
-  box-shadow: 0 2px 8px var(--accent-glow);
-}
-.send-btn:hover:not(:disabled) {
-  transform: scale(1.06); background: var(--accent-hover);
-  box-shadow: 0 4px 16px var(--accent-glow);
-}
-.send-btn:active:not(:disabled) { transform: scale(0.95); }
-.send-btn:disabled { opacity: 0.25; pointer-events: none; box-shadow: none; }
-.send-btn svg { width: 18px; height: 18px; }
+/* Input */
+.i-input-wrap{padding:16px 24px;background:var(--bg);border-top:.5px solid var(--border);flex-shrink:0}
+.i-input-inner{max-width:740px;margin:0 auto;display:flex;align-items:flex-end;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:8px 8px 8px 18px;transition:border-color .2s,box-shadow .2s}
+.i-input-inner:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.i-input-inner textarea{flex:1;border:none;background:transparent;font-size:15px;font-family:var(--font);line-height:1.5;resize:none;outline:none;max-height:72px;padding:4px 0;color:var(--text)}
+.i-input-inner textarea::placeholder{color:#9CA3AF}
+.send-btn{width:40px;height:40px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s var(--ease)}
+.send-btn:hover:not(:disabled){transform:scale(1.05);background:var(--accent-hover)}
+.send-btn:disabled{opacity:.3;cursor:not-allowed}
+.send-btn svg{width:18px;height:18px}
+.i-hint{text-align:center;font-size:11px;color:#D1D5DB;margin-top:8px}
+.i-hint kbd{display:inline-block;padding:1px 5px;border-radius:3px;border:1px solid var(--border);background:var(--bg2);font-family:var(--font);font-size:10px;color:var(--text2)}
 
-.input-hint {
-  text-align: center; font-size: 11px; color: var(--text-tertiary);
-  margin-top: 8px; letter-spacing: 0.01em;
-}
-.input-hint kbd {
-  display: inline-block; padding: 1px 5px; border-radius: 4px;
-  border: 1px solid var(--border); background: var(--surface-secondary);
-  font-family: var(--font); font-size: 10px; color: var(--text-secondary);
-}
-
-/* ═══════════════════════════════════════════════════════════════ */
-/*  REPORT VIEW                                                  */
-/* ═══════════════════════════════════════════════════════════════ */
-#report {
-  align-items: flex-start; justify-content: center; padding: 48px 20px;
-  background:
-    radial-gradient(ellipse 50% 40% at 50% 0%, rgba(92,92,234,0.03) 0%, transparent 100%),
-    var(--bg);
-}
-.report-wrapper { width: 100%; max-width: 800px; }
-
-/* Report header */
-.rpt-header { text-align: center; margin-bottom: 40px; }
-.rpt-header h1 {
-  font-size: 28px; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 6px;
-  background: linear-gradient(135deg, #18181B 0%, #3F3F46 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.rpt-header .rpt-meta {
-  font-size: 14px; color: var(--text-secondary);
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-}
-.rpt-meta .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+/* ═══════════════════════════════════════════════════════════ */
+/*  REPORT VIEW                                               */
+/* ═══════════════════════════════════════════════════════════ */
+#report{align-items:flex-start;justify-content:center;padding:48px 20px;background:var(--bg2);min-height:100vh}
+.rpt-card{background:var(--bg);border-radius:12px;box-shadow:var(--shadow);padding:48px;max-width:860px;width:100%}
+.rpt-card h1{font-size:26px;font-weight:600;margin-bottom:4px}
+.rpt-card .rpt-date{color:var(--text2);font-size:14px;margin-bottom:36px}
 
 /* Score hero */
-.score-hero {
-  display: flex; align-items: center; gap: 40px; margin-bottom: 40px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-xl); padding: 32px 36px;
-  box-shadow: var(--shadow-md); flex-wrap: wrap; justify-content: center;
-}
-.ring-wrap { position: relative; width: 170px; height: 170px; flex-shrink: 0; }
-.ring-wrap svg { transform: rotate(-90deg); display: block; }
-.ring-center {
-  position: absolute; inset: 0; display: flex;
-  flex-direction: column; align-items: center; justify-content: center;
-}
-.ring-center .big-score { font-size: 46px; font-weight: 700; letter-spacing: -0.025em; line-height: 1; }
-.ring-center .big-score-unit { font-size: 14px; color: var(--text-tertiary); margin-top: 2px; }
-.score-info { flex: 1; min-width: 200px; }
-.score-info .rating-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 14px; border-radius: var(--radius-full);
-  font-size: 13px; font-weight: 600; margin-bottom: 16px;
-  background: var(--success-soft); color: var(--success);
-}
-.rating-pill svg { width: 14px; height: 14px; }
-.score-info .summary-text {
-  font-size: 15px; color: var(--text-secondary); line-height: 1.7;
-}
+.rpt-hero{display:flex;align-items:center;gap:48px;margin-bottom:40px;flex-wrap:wrap;justify-content:center}
+.ring-wrap{position:relative;width:160px;height:160px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-center .big{font-size:42px;font-weight:700;letter-spacing:-0.02em}
+.ring-center .unit{font-size:13px;color:var(--text2);margin-top:2px}
+.rpt-info{flex:1;min-width:220px}
+.rpt-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:500;margin-bottom:12px;background:rgba(16,185,129,.1);color:var(--success)}
+.rpt-info p{color:var(--text2);font-size:14px;line-height:1.7}
 
 /* Radar */
-.radar-section {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-xl); padding: 32px 36px;
-  margin-bottom: 24px; box-shadow: var(--shadow-sm);
-  text-align: center;
-}
-.radar-section h3 { font-size: 17px; font-weight: 600; margin-bottom: 24px; letter-spacing: -0.01em; }
-.radar-container { display: inline-block; }
+.radar-box{text-align:center;margin-bottom:36px}
+.radar-box h3{font-size:18px;font-weight:600;margin-bottom:20px}
+.radar-svg{max-width:100%;height:auto}
 
 /* Detail cards */
-.detail-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;
-}
-.detail-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 24px;
-  box-shadow: var(--shadow-sm); transition: all 0.2s var(--ease-out);
-}
-.detail-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-.detail-card .dc-icon {
-  width: 36px; height: 36px; border-radius: 10px; display: flex;
-  align-items: center; justify-content: center; margin-bottom: 16px;
-}
-.detail-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px; letter-spacing: -0.01em; }
-.detail-card ul { list-style: none; font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
-.detail-card ul li { display: flex; gap: 8px; align-items: flex-start; }
-.detail-card ul li::before { content: '—'; color: var(--text-tertiary); flex-shrink: 0; }
+.rpt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:36px}
+.rpt-dc{padding:20px;border-radius:8px;background:var(--bg2);border:1px solid var(--border)}
+.rpt-dc .dc-icon{width:32px;height:32px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.rpt-dc h4{font-size:15px;font-weight:600;margin-bottom:10px}
+.rpt-dc ul{list-style:none;font-size:14px;color:#4B5563;line-height:1.8}
+.rpt-dc ul li::before{content:'—';margin-right:8px;color:var(--text2)}
+.dc-good .dc-icon{background:rgba(16,185,129,.1)}.dc-bad .dc-icon{background:rgba(245,158,11,.1)}.dc-tip .dc-icon{background:rgba(79,70,229,.1)}
 
-.detail-card.strengths .dc-icon { background: var(--success-soft); }
-.detail-card.weaknesses .dc-icon { background: var(--warning-soft); }
-.detail-card.suggestions .dc-icon { background: var(--accent-soft); }
+.rpt-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 
-/* Report actions */
-.rpt-actions {
-  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-}
-
-/* ═══════════════════════════════════════════════════════════════ */
-/*  RESPONSIVE                                                   */
-/* ═══════════════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .form-card { padding: 24px; }
-  .setup-tips { grid-template-columns: 1fr; }
-  .msg { max-width: 85%; }
-  .score-hero { flex-direction: column; gap: 24px; text-align: center; }
-  .ring-wrap { width: 140px; height: 140px; }
-  .detail-grid { grid-template-columns: 1fr; }
-  .radar-section { padding: 24px 20px; }
-}
-
-@media (max-width: 480px) {
-  .brand-strip h1 { font-size: 24px; }
-  .i-header { padding: 12px 16px; }
-  .msg { max-width: 90%; gap: 8px; }
-  .chat-area { padding: 20px 16px; }
-  .chat-inner { gap: 20px; }
-  .input-area { padding: 12px 16px 16px; }
-  .ring-wrap { width: 120px; height: 120px; }
-  .ring-center .big-score { font-size: 36px; }
+/* ═══════════════════════════════════════════════════════════ */
+/*  RESPONSIVE                                                */
+/* ═══════════════════════════════════════════════════════════ */
+@media(max-width:640px){
+  .setup-card,.rpt-card{padding:24px}
+  .msg{max-width:85%}
+  .rpt-hero{flex-direction:column;gap:24px}
+  .ring-wrap{width:130px;height:130px}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  SETUP VIEW                                                    -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  SETUP VIEW                                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="setup" class="view active">
-  <div class="setup-wrapper">
-    <div class="brand-strip">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-        </svg>
-      </div>
-      <h1>AI 技术面试</h1>
-      <p class="brand-sub">输入岗位 JD 和候选人简历，智能生成定制化技术面试，<br>实时评估并出具多维度能力报告。</p>
+  <div class="setup-card">
+    <h1>AI 技术面试</h1>
+    <p class="sub">输入岗位描述与候选人简历，智能生成定制化面试。</p>
+    <div class="fg">
+      <label>岗位描述 (JD)</label>
+      <textarea id="jd" placeholder="技术栈：Java 17, Spring Boot 3.x, Spring Cloud, MySQL 8.0, Redis, RabbitMQ, Docker, K8s&#10;&#10;岗位职责：&#10;1. 负责核心交易系统的微服务架构设计与开发&#10;2. 主导高并发场景下的性能优化，目标 QPS 5,000+&#10;3. 编写技术设计文档，指导初中级工程师" oninput="JD.count()"></textarea>
+      <div class="char-hint" id="jd-count">0 / 2000</div>
     </div>
-
-    <div class="setup-tips">
-      <div class="tip-chip">
-        <div class="tip-dot jd"></div>
-        描述岗位的核心技术栈和职责要求
-      </div>
-      <div class="tip-chip">
-        <div class="tip-dot cv"></div>
-        简历越详细，AI 出题越有针对性
-      </div>
+    <div class="fg">
+      <label>候选人简历</label>
+      <textarea id="resume" placeholder="张三 | 高级 Java 工程师 | 8 年经验&#10;&#10;· 主导支付系统架构升级，QPS 从 800 提升至 4,500&#10;· 设计分布式事务方案（Seata + MQ 最终一致性）&#10;· 优化 JVM GC 策略，Full GC 频率从 2 次/天降至 1 次/周" oninput="Resume.count()"></textarea>
+      <div class="char-hint" id="resume-count">0 / 2000</div>
     </div>
-
-    <div class="form-card">
-      <div class="form-group">
-        <div class="form-label">
-          <span>岗位描述 (JD)</span>
-          <span class="optional" id="jd-count">0 字</span>
-        </div>
-        <textarea id="jd" class="form-textarea"
-          placeholder="技术栈：Java 17, Spring Boot 3.x, Spring Cloud, MyBatis Plus, MySQL 8.0, Redis, RabbitMQ, Docker, K8s&#10;&#10;岗位职责：&#10;1. 负责核心交易系统的微服务架构设计与开发&#10;2. 主导高并发场景下的性能优化，目标 QPS 5,000+&#10;3. 编写技术设计文档，指导初中级工程师&#10;&#10;任职要求：&#10;· 5 年以上 Java 后端开发经验&#10;· 精通分布式系统设计，有实际微服务治理经验&#10;· 熟悉 JVM 调优、SQL 优化，能独立排查生产问题"
-          oninput="updateJdCount()"></textarea>
-      </div>
-
-      <div class="form-group">
-        <div class="form-label">
-          <span>候选人简历</span>
-          <span class="optional" id="resume-count">0 字</span>
-        </div>
-        <textarea id="resume" class="form-textarea"
-          placeholder="张三 | 高级 Java 工程师 | 8 年经验&#10;&#10;教育背景：&#10;2014-2018 浙江大学 计算机科学与技术 本科&#10;&#10;工作经历：&#10;2022-至今 某互联网大厂 资深后端工程师&#10;· 主导支付系统架构升级，将 QPS 从 800 提升至 4,500&#10;· 设计并落地了分布式事务方案（Seata + MQ 最终一致性）&#10;· 优化 JVM GC 策略，Full GC 频率从 2 次/天降至 1 次/周&#10;&#10;2020-2022 某金融科技公司 Java 工程师&#10;· 负责风控引擎重构，规则匹配性能提升 12 倍&#10;· 搭建了公司级 API 网关，日均处理 3 亿请求&#10;&#10;技术特长：&#10;Java / Spring Boot / 分布式系统 / 性能调优 / MySQL / Redis"
-          oninput="updateResumeCount()"></textarea>
-      </div>
-
-      <button class="btn btn-primary btn-lg btn-full" onclick="startInterview()">
-        开始面试
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px">
-          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-        </svg>
-      </button>
-    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="App.start()">开始面试</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  INTERVIEW VIEW                                                -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  INTERVIEW VIEW                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="interview" class="view">
-  <div class="i-header">
-    <div class="i-header-left">
-      <div class="i-live-dot"></div>
-      <span class="i-progress" id="progressText">准备开始</span>
-      <span class="i-topic-badge" id="topicBadge" style="display:none"></span>
+  <div class="i-hdr">
+    <div class="i-hdr-l">
+      <div class="i-dot"></div>
+      <span class="i-prog" id="prog">准备开始</span>
     </div>
-    <div class="i-header-right">
-      <button class="btn-danger" onclick="endInterview()">结束面试</button>
-    </div>
+    <button class="i-end-btn" onclick="App.end()">结束面试</button>
   </div>
-
-  <div class="chat-area" id="chatArea">
+  <div class="chat-wrap" id="chatWrap">
     <div class="chat-inner" id="chatInner"></div>
   </div>
-
-  <div class="input-area">
-    <div class="input-wrap" id="inputWrap">
-      <textarea id="userInput" placeholder="输入你的回答…" rows="1"
-        onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
-      <button class="send-btn" id="sendBtn" disabled onclick="sendMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
+  <div class="i-input-wrap">
+    <div class="i-input-inner" id="inputWrap">
+      <textarea id="userInput" placeholder="输入你的回答…" rows="1" onkeydown="App.key(event)" oninput="App.resize()"></textarea>
+      <button class="send-btn" id="sendBtn" disabled onclick="App.send()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
-    <div class="input-hint">
-      按 <kbd>Enter</kbd> 发送 · <kbd>Shift</kbd> + <kbd>Enter</kbd> 换行
-    </div>
+    <div class="i-hint">按 <kbd>Enter</kbd> 发送 · <kbd>Shift</kbd> + <kbd>Enter</kbd> 换行</div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  REPORT VIEW                                                   -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  REPORT VIEW                                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="report" class="view">
-  <div class="report-wrapper" id="reportContent"></div>
+  <div class="rpt-card" id="rptContent"></div>
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════ */
-/*  GLOBALS                                                     */
-/* ═══════════════════════════════════════════════════════════════ */
-const $ = id => document.getElementById(id);
-let S = {
-  jd: '', resume: '', q: [], qi: 0, qTotal: 5, qFollowUps: 0,
-  history: [], scores: [], name: '候选人', locked: false, topic: '',
+/* ═══════════════════════════════════════════════════════════ */
+/*  UTILS                                                     */
+/* ═══════════════════════════════════════════════════════════ */
+const $=s=>document.getElementById(s);
+const V=v=>{['setup','interview','report'].forEach(x=>$(x).classList.toggle('active',x===v))}
+const T=()=>new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+
+/* Char counters */
+const JD={count:()=>{$('jd-count').textContent=$('jd').value.length+' / 2000'}}
+const Resume={count:()=>{$('resume-count').textContent=$('resume').value.length+' / 2000'}}
+
+/* ═══════════════════════════════════════════════════════════ */
+/*  APP STATE                                                 */
+/* ═══════════════════════════════════════════════════════════ */
+const App={
+  jd:'',cv:'',questions:[],qi:0,qTotal:5,
+  history:[],scores:[],locked:false,name:'候选人',
+
+  start(){
+    const jd=$('jd').value.trim(),cv=$('resume').value.trim();
+    if(!jd||!cv)return alert('请填写岗位 JD 和候选人简历');
+    this.jd=jd;this.cv=cv;this.qi=0;this.qTotal=5;
+    this.history=[];this.scores=[];this.locked=false;
+    this.questions=Q.build(jd,cv);
+    this.name=(cv.match(/([一-龥]{2,3})(?:，|,|\s|的|·)/)||[])[1]||'候选人';
+    $('chatInner').innerHTML='';
+    $('userInput').value='';$('userInput').style.height='auto';
+    $('sendBtn').disabled=true;$('userInput').disabled=true;
+    $('prog').textContent='准备开始';
+    V('interview');
+
+    setTimeout(()=>{
+      Chat.ai(`你好，${this.name}！欢迎参加本次技术面试。我将根据岗位要求进行 5 轮技术考察，请用具体的项目案例来展现你的技术深度。准备好了吗？`);
+      setTimeout(()=>this.askQ(),2200);
+    },400);
+  },
+
+  askQ(){
+    const q=this.questions[this.qi];
+    $('prog').textContent=`第 ${this.qi+1}/${this.qTotal} 题`;
+    Chat.ai(q.q);
+    this.locked=false;
+    $('userInput').disabled=false;$('userInput').focus();
+    this.upSend();
+  },
+
+  send(){
+    if(this.locked)return;
+    const inp=$('userInput'),text=inp.value.trim();
+    if(!text)return;
+    this.locked=true;inp.disabled=true;$('sendBtn').disabled=true;
+    Chat.user(text);inp.value='';inp.style.height='auto';this.upSend();
+
+    // Score this answer
+    const sc=S.score(text,this.questions[this.qi].topic);
+    this.scores.push(sc);
+
+    const think=Chat.think();
+    const follow=Q.followUp(text,this.qi);
+
+    setTimeout(()=>{
+      Chat.remove(think);
+      if(follow){
+        Chat.ai(follow);
+        $('prog').textContent=`第 ${this.qi+1}/${this.qTotal} 题 · 追问中`;
+        this.locked=false;inp.disabled=false;inp.focus();this.upSend();
+      }else{
+        this.qi++;
+        if(this.qi<this.qTotal){
+          Chat.ai('好的，我们看下一个问题。');
+          setTimeout(()=>this.askQ(),1200);
+        }else{
+          Chat.ai('感谢你的精彩回答！5 轮考察已全部完成，正在生成评估报告…');
+          setTimeout(()=>this.finish(),2000);
+        }
+      }
+    },800+Math.random()*1400);
+  },
+
+  finish(){
+    this.locked=true;$('userInput').disabled=true;$('sendBtn').disabled=true;
+    $('prog').textContent='面试结束';V('report');R.build();
+  },
+
+  end(){
+    if(this.locked||this.qi===0)return;
+    if(!confirm('提前结束面试？将根据已回答的题目生成评估报告。'))return;
+    Chat.sys('面试已结束，正在生成评估报告…');
+    $('userInput').disabled=true;$('sendBtn').disabled=true;this.locked=true;
+    setTimeout(()=>this.finish(),1800);
+  },
+
+  key(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();this.send()}},
+  resize(){
+    const el=$('userInput');el.style.height='auto';el.style.height=Math.min(el.scrollHeight,72)+'px';this.upSend();
+  },
+  upSend(){$('sendBtn').disabled=!$('userInput').value.trim()||this.locked},
 };
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  VIEWS                                                        */
-/* ═══════════════════════════════════════════════════════════════ */
-function showView(v) {
-  ['setup','interview','report'].forEach(x => $(x).classList.toggle('active', x === v));
-}
+/* ═══════════════════════════════════════════════════════════ */
+/*  CHAT RENDERING                                            */
+/* ═══════════════════════════════════════════════════════════ */
+const Chat={
+  ai(text,animate=true){
+    const el=this._add('ai',text,animate?'<span class="type-target"></span>':text);
+    if(animate)this._type(el.querySelector('.msg-bub'),text);
+    return el;
+  },
+  user(text){return this._add('user',text,text)},
+  sys(text){return this._add('sys',text,text)},
+  think(){
+    const d=document.createElement('div');d.className='msg ai';
+    d.innerHTML='<div class="msg-av"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="9" cy="10" r="1.5" fill="#6B7280"/><circle cx="15" cy="10" r="1.5" fill="#6B7280"/><path d="M8 16c1.5 2 4 2.5 6.5 1.5"/></svg></div><div class="msg-bub"><div class="think-dots"><span></span><span></span><span></span></div></div>';
+    $('chatInner').appendChild(d);this._scroll();return d;
+  },
+  remove(el){if(el&&el.parentNode)el.remove()},
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  SETUP HELPERS                                                */
-/* ═══════════════════════════════════════════════════════════════ */
-function updateJdCount() { $('jd-count').textContent = $('jd').value.length + ' 字'; }
-function updateResumeCount() { $('resume-count').textContent = $('resume').value.length + ' 字'; }
+  _add(role,content,html){
+    const avAI='<div class="msg-av"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="9" cy="10" r="1.5" fill="#6B7280"/><circle cx="15" cy="10" r="1.5" fill="#6B7280"/><path d="M8 16c1.5 2 4 2.5 6.5 1.5"/></svg></div>';
+    const avUser='<div class="msg-av"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>';
+    const av=role==='ai'?avAI:role==='user'?avUser:'';
+    const d=document.createElement('div');d.className=`msg ${role}`;
+    d.innerHTML=role==='sys'?`<div class="msg-bub">${html}</div>`:`${av}<div><div class="msg-bub">${html}</div><div class="msg-time">${T()}</div></div>`;
+    $('chatInner').appendChild(d);this._scroll();return d;
+  },
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  KEYWORD + QUESTION ENGINE                                    */
-/* ═══════════════════════════════════════════════════════════════ */
-function extractKeywords(text) {
-  const pool = [
-    'Java','Spring Boot','Spring Cloud','MyBatis','MySQL','Redis','RabbitMQ','Kafka',
-    'Docker','Kubernetes','微服务','分布式','JVM','多线程','高并发','性能优化',
-    'SQL优化','缓存','消息队列','DDD','领域驱动','Python','Django','FastAPI',
-    'React','Vue','Vue3','TypeScript','JavaScript','Node.js','Go','Golang',
-    'Rust','C++','TensorFlow','PyTorch','AI','机器学习','Elasticsearch',
-    '网关','Seata','分布式事务','分库分表','读写分离','设计模式','系统设计',
-  ];
-  const found = [];
-  pool.forEach(k => { if (text.includes(k) && !found.includes(k)) found.push(k); });
-  return found.length ? found.slice(0, 6) : ['核心技术栈'];
-}
+  _type(el,text){
+    el.textContent='';let i=0;
+    const cur=document.createElement('span');cur.className='type-cursor';el.appendChild(cur);
+    const iv=setInterval(()=>{
+      if(i>=text.length){cur.remove();clearInterval(iv);return}
+      el.insertBefore(document.createTextNode(text[i]),cur);i++;Chat._scroll();
+    },25+Math.random()*15);
+  },
 
-function buildQuestions(jd, resume) {
-  const jk = extractKeywords(jd);
-  const rk = extractKeywords(resume);
-  const all = [...new Set([...jk, ...rk])];
-  const t1 = all[0] || '核心技术';
-  const t2 = all[1] || all[0] || '系统架构';
-  const t3 = all[2] || '性能优化';
+  _scroll(){
+    requestAnimationFrame(()=>{
+      const w=$('chatWrap');w.scrollTo({top:w.scrollHeight,behavior:'smooth'});
+    });
+  }
+};
 
-  return [
-    {
-      q: `请结合你简历中提到的 ${t1} 项目经验，详细介绍你负责的核心模块架构设计。具体承担了哪些技术决策，遇到了什么挑战？`,
-      topic: '项目深挖',
-    },
-    {
-      q: `在 ${t2} 方面，能否分享一个你从 0 到 1 主导的技术方案？重点说明你的技术选型依据、备选方案对比，以及最终的 trade-off 决策。`,
-      topic: '架构设计',
-    },
-    {
-      q: `假设你加入后需要将现有系统的 ${t3} 提升 3-5 倍，请给出你的完整优化思路。从发现问题到方案设计，再到验证手段，你会怎么推进？`,
-      topic: '性能优化',
-    },
-    {
-      q: `描述一次你处理过的复杂线上故障。当时如何快速定位根因？采取了什么止损和修复措施？事后输出了哪些改进规范？`,
-      topic: '问题排查',
-    },
-    {
-      q: `最后，如果让你从零搭建一个基于 ${t1} 的新项目，你会怎么设计它的分层架构、技术选型、CI/CD 流水线和监控体系？`,
-      topic: '综合素养',
-    },
-  ];
-}
+/* ═══════════════════════════════════════════════════════════ */
+/*  QUESTION ENGINE                                           */
+/* ═══════════════════════════════════════════════════════════ */
+const Q={
+  extract(text){
+    const pool=['Java','Spring Boot','Spring Cloud','MyBatis','MySQL','Redis','RabbitMQ','Kafka','Docker','Kubernetes','微服务','分布式','JVM','多线程','高并发','性能优化','Python','React','Vue','TypeScript','Go','Rust','Elasticsearch','DDD','领域驱动'];
+    const r=[];pool.forEach(k=>{if(text.includes(k)&&!r.includes(k))r.push(k)});
+    return r.length?r.slice(0,6):['核心技术栈'];
+  },
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  FOLLOW-UP LOGIC                                              */
-/* ═══════════════════════════════════════════════════════════════ */
-function decideFollowUp(answer) {
-  const len = answer.length;
-  if (len < 40) return '能否更详细地展开？最好结合一个具体的代码示例或架构图来阐述你的思路。';
-  if (len < 100) return '你可以再深入一层——这个方案在极端边界条件下（如网络分区、大流量冲击）会有什么表现？';
-  if (/\b(但是|然而|问题|困难|挑战|坑)\b/.test(answer))
-    return '你提到了一些挑战，能否具体说说最终是通过什么方法解决的？有哪些可复用的经验？';
-  if (/\b(性能|优化|提升|降低|减少)\b/.test(answer) && len < 180)
-    return '很好的方向。有没有可以量化的数据来佐证优化效果？比如响应时间、吞吐量或资源占用率的变化？';
-  return null;
-}
+  build(jd,cv){
+    const jk=this.extract(jd),rk=this.extract(cv);
+    const a=[...new Set([...jk,...rk])],t1=a[0]||'核心技术',t2=a[1]||a[0]||'系统架构',t3=a[2]||'性能优化';
+    return[
+      {q:`请结合您在简历中提到的 ${t1} 项目经验，详细介绍您负责的核心模块架构。您承担了哪些关键技术决策？遇到过什么挑战？`,topic:'项目深挖'},
+      {q:`在 ${t2} 方面，能否分享一个您从 0 到 1 主导的技术方案？重点说明技术选型依据和最终的 trade-off 决策。`,topic:'架构设计'},
+      {q:`假设您加入团队后需要将 ${t3} 性能提升 3-5 倍。请给出您的完整优化思路——从发现问题到方案落地再到效果验证。`,topic:'性能优化'},
+      {q:`描述一次您处理过的复杂线上故障。如何快速定位根因？采取了什么止损措施？事后输出了哪些改进规范？`,topic:'故障排查'},
+      {q:`如果让您从零搭建一个基于 ${t1} 的新项目，您会如何设计它的分层架构、技术选型、CI/CD 流水线和监控体系？`,topic:'综合素养'},
+    ];
+  },
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  SCORING                                                      */
-/* ═══════════════════════════════════════════════════════════════ */
-function scoreAnswer(answer) {
-  const len = Math.min(answer.length, 400);
-  const lengthFactor = len / 40; // ~0-10
-  const variety = new Set(answer.split('').filter(c => /[一-龥]/.test(c))).size / 5;
-  const base = 70 + Math.min(lengthFactor * 2, 20) + Math.min(variety, 8);
-  const jitter = () => Math.round(Math.random() * 8 - 4);
-  return {
-    techDepth:     clamp(Math.round(base + jitter()), 55, 98),
-    architecture:  clamp(Math.round(base + jitter() + 2), 55, 98),
-    communication: clamp(Math.round(base + jitter() - 2), 55, 98),
-    engineering:   clamp(Math.round(base + jitter() + 4), 55, 98),
-    problemSolving:clamp(Math.round(base + jitter()), 55, 98),
-  };
-}
-function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  followUp(text,qi){
+    const len=text.length;
+    if(len<40)return '能否更详细地展开？请结合具体的代码示例或架构图来阐述您的思路。';
+    if(len<100)return '可以再深入一层——这个方案在极端边界条件下（如网络分区、大流量冲击）会有什么表现？';
+    if(/但是|然而|问题|困难|挑战|坑/.test(text))return '您提到了一些挑战，最终是通过什么方法解决的？有哪些可复用的经验可以分享？';
+    return null;
+  }
+};
 
-function averageScores(list) {
-  if (!list.length) return { techDepth:72, architecture:70, communication:68, engineering:70, problemSolving:72 };
-  const s = { techDepth:0, architecture:0, communication:0, engineering:0, problemSolving:0 };
-  list.forEach(x => { for (const k in s) s[k] += x[k]; });
-  const n = list.length;
-  for (const k in s) s[k] = Math.round(s[k] / n);
-  return s;
-}
+/* ═══════════════════════════════════════════════════════════ */
+/*  SCORING ENGINE                                            */
+/* ═══════════════════════════════════════════════════════════ */
+const S={
+  score(text,topic){
+    const len=Math.min(text.length,400),base=68+Math.min(len/30,20)+Math.floor(Math.random()*10);
+    const j=()=>Math.round(Math.random()*6-3);
+    return{techDepth:Math.min(98,Math.max(55,Math.round(base+j()))),logicThinking:Math.min(98,Math.max(55,Math.round(base+j()))),communication:Math.min(98,Math.max(55,Math.round(base+j()-2))),engineering:Math.min(98,Math.max(55,Math.round(base+j()+2))),learning:Math.min(98,Math.max(55,Math.round(base+j())))};
+  },
+  avg(list){
+    if(!list.length)return{techDepth:75,logicThinking:74,communication:70,engineering:72,learning:76};
+    const s={techDepth:0,logicThinking:0,communication:0,engineering:0,learning:0};
+    list.forEach(x=>{for(const k in s)s[k]+=x[k]});
+    const n=list.length;for(const k in s)s[k]=Math.round(s[k]/n);
+    return s;
+  }
+};
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  MESSAGE RENDERING                                            */
-/* ═══════════════════════════════════════════════════════════════ */
-function addMsg(role, content, opts = {}) {
-  const { animate = false, topic } = opts;
-  const wrap = document.createElement('div');
-  wrap.className = `msg ${role}`;
+/* ═══════════════════════════════════════════════════════════ */
+/*  REPORT BUILDER                                            */
+/* ═══════════════════════════════════════════════════════════ */
+const R={
+  build(){
+    const avg=S.avg(App.scores);
+    const dims=[
+      {key:'techDepth',label:'技术深度',score:avg.techDepth},
+      {key:'logicThinking',label:'逻辑思维',score:avg.logicThinking},
+      {key:'communication',label:'沟通表达',score:avg.communication},
+      {key:'engineering',label:'工程素养',score:avg.engineering},
+      {key:'learning',label:'学习能力',score:avg.learning},
+    ];
+    const overall=Math.round(dims.reduce((s,d)=>s+d.score,0)/dims.length);
 
-  if (role === 'system') {
-    wrap.innerHTML = `<div class="msg-bubble">${content}</div>`;
-  } else {
-    const avatarHtml = role === 'ai'
-      ? `<div class="msg-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="8.5" cy="10" r="1.5" fill="#6B7280"/><circle cx="15.5" cy="10" r="1.5" fill="#6B7280"/><path d="M8 16.5c1.8 2.2 5 2.6 7.5 1.3"/></svg></div>`
-      : `<div class="msg-avatar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4.5"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>`;
+    let rating='良好';if(overall>=90)rating='卓越';else if(overall>=80)rating='优秀';else if(overall<70)rating='一般';
+    const desc=rating==='卓越'||rating==='优秀'?'展现了出色的技术能力，与目标岗位高度匹配。':'展现了扎实的技术功底，符合岗位基本要求。';
 
-    wrap.innerHTML = `
-      ${avatarHtml}
-      <div class="msg-body">
-        <div class="msg-bubble">${animate ? '<span class="type-target"></span>' : content}</div>
-        <div class="msg-meta">
-          <span class="msg-time">${fmtTime()}</span>
-          ${topic ? `<span class="msg-score-pill">${topic}</span>` : ''}
+    const hi=dims.filter(d=>d.score>=82).map(d=>`${d.label}表现突出（${d.score}分），展现了扎实的工程实践能力`);
+    const lo=dims.filter(d=>d.score<=70).map(d=>`${d.label}可持续加强（${d.score}分），建议多做相关实践`);
+    if(!hi.length)hi.push('整体技术能力均衡，具备良好的工程素养');
+    if(!lo.length)lo.push('各维度表现均在良好线以上，暂无明显的短板领域');
+    const tips=['针对薄弱维度制定专项学习计划，结合开源项目或内部技术分享强化','养成先设计再编码的习惯，方案评审阶段多做 trade-off 分析','持续关注行业前沿技术动态，保持对新技术的批判性思维'];
+
+    $('rptContent').innerHTML=`
+      <h1>面试报告 - ${App.name}</h1>
+      <p class="rpt-date">${new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'})} · 共 ${App.qTotal} 题</p>
+      <div class="rpt-hero">
+        <div class="ring-wrap" id="ringWrap"></div>
+        <div class="rpt-info">
+          <div class="rpt-badge">${rating}</div>
+          <p>候选人在本次技术面试中${desc}</p>
         </div>
+      </div>
+      <div class="radar-box"><h3>能力雷达图</h3><div class="radar-svg" id="radarWrap"></div></div>
+      <div class="rpt-grid">
+        <div class="rpt-dc dc-good"><div class="dc-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><h4>优势</h4><ul>${hi.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="rpt-dc dc-bad"><div class="dc-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h4>待改进</h4><ul>${lo.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="rpt-dc dc-tip"><div class="dc-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h4>提升建议</h4><ul>${tips.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      </div>
+      <div class="rpt-actions">
+        <button class="btn btn-primary" onclick="window.print()">下载报告</button>
+        <button class="btn btn-secondary" onclick="R.reset()">重新面试</button>
       </div>`;
-  }
 
-  $('chatInner').appendChild(wrap);
-  scrollDown();
+    requestAnimationFrame(()=>{this.ring(overall);this.radar(dims)});
+  },
 
-  if (animate) {
-    typeText(wrap.querySelector('.msg-bubble'), content);
-  }
-  return wrap;
-}
+  ring(score){
+    const r=69,circ=2*Math.PI*r,off=circ-(circ*score)/100;
+    $('ringWrap').innerHTML=`
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs>
+        <circle cx="80" cy="80" r="${r}" fill="none" stroke="#F3F4F6" stroke-width="10"/>
+        <circle cx="80" cy="80" r="${r}" fill="none" stroke="url(#rg)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" id="ringArc"/>
+      </svg>
+      <div class="ring-center"><span class="big">${score}</span><span class="unit">/ 100</span></div>`;
+    requestAnimationFrame(()=>{const a=document.getElementById('ringArc');if(a)a.style.strokeDashoffset=off});
+  },
 
-function typeText(el, text) {
-  el.textContent = '';
-  let i = 0;
-  const speed = 22 + Math.random() * 12;
-  const cursor = document.createElement('span');
-  cursor.className = 'cursor-blink';
-  el.appendChild(cursor);
-  const iv = setInterval(() => {
-    if (i >= text.length) { cursor.remove(); clearInterval(iv); return; }
-    el.insertBefore(document.createTextNode(text[i]), cursor);
-    i++;
-    scrollDown();
-  }, speed);
-}
+  radar(dims){
+    const n=dims.length,size=300,cx=size/2,cy=size/2,r=120;
+    const pt=(i,rad)=>{const a=2*Math.PI*i/n-Math.PI/2;return{x:cx+rad*Math.cos(a),y:cy+rad*Math.sin(a)}};
 
-/* Thinking placeholder */
-function addThinking() {
-  const wrap = document.createElement('div');
-  wrap.className = 'msg ai thinking-msg';
-  wrap.innerHTML = `
-    <div class="msg-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="8.5" cy="10" r="1.5" fill="#6B7280"/><circle cx="15.5" cy="10" r="1.5" fill="#6B7280"/><path d="M8 16.5c1.8 2.2 5 2.6 7.5 1.3"/></svg></div>
-    <div class="msg-body"><div class="msg-bubble"><div class="thinking-dots"><span></span><span></span><span></span></div></div></div>`;
-  $('chatInner').appendChild(wrap);
-  scrollDown();
-  return wrap;
-}
-function removeThinking(el) { if (el) el.remove(); }
+    let grid='';for(let l=1;l<=4;l++){const pts=Array.from({length:n},(_,i)=>pt(i,r*l/4));grid+=`<polygon points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="#E5E7EB" stroke-width="1"/>`}
+    let axes='';for(let i=0;i<n;i++){const p=pt(i,r);axes+=`<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#E5E7EB" stroke-width="1"/>`}
 
-function scrollDown() {
-  const a = $('chatArea');
-  requestAnimationFrame(() => { a.scrollTo({ top: a.scrollHeight, behavior: 'smooth' }); });
-}
+    const dp=Array.from({length:n},(_,i)=>pt(i,r*dims[i].score/100));
+    const poly=dp.map(p=>p.x+','+p.y).join(' ');
+    const dots=dp.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#FFF" stroke="#4F46E5" stroke-width="2.5"/>`).join('');
+    let labels='',vals='';
+    dims.forEach((d,i)=>{const p=pt(i,r+22);labels+=`<text x="${p.x}" y="${p.y}" text-anchor="middle" fill="#6B7280" font-size="12" font-weight="500" font-family="var(--font)">${d.label}</text>`;const q=pt(i,r+42);vals+=`<text x="${q.x}" y="${q.y}" text-anchor="middle" fill="#1A1A1A" font-size="13" font-weight="700" font-family="var(--font)">${d.score}</text>`});
 
-function fmtTime() { return new Date().toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit' }); }
+    $('radarWrap').innerHTML=`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="max-width:100%;height:auto">${grid}${axes}<polygon points="${poly}" fill="rgba(79,70,229,0.12)" stroke="#4F46E5" stroke-width="2" stroke-linejoin="round"/>${dots}${labels}${vals}</svg>`;
+  },
 
-/* ═══════════════════════════════════════════════════════════════ */
-/*  INTERVIEW FLOW                                               */
-/* ═══════════════════════════════════════════════════════════════ */
-function startInterview() {
-  const jd = $('jd').value.trim(), cv = $('resume').value.trim();
-  if (!jd || !cv) { alert('请完整填写岗位 JD 和候选人简历'); return; }
-  S.jd = jd; S.resume = cv; S.q = buildQuestions(jd, cv);
-  S.qi = 0; S.qTotal = S.q.length; S.qFollowUps = 0;
-  S.history = []; S.scores = []; S.locked = false;
-  S.name = (cv.match(/([一-龥]{2,3})(?:，|,|\s|的|是|。|；|简历|·)/) || [])[1] || '候选人';
-  S.topic = '';
-
-  $('chatInner').innerHTML = '';
-  $('userInput').value = ''; $('userInput').style.height = 'auto';
-  $('userInput').disabled = true;
-  $('sendBtn').disabled = true;
-  $('topicBadge').style.display = 'none';
-  $('progressText').textContent = '准备开始';
-
-  showView('interview');
-
-  setTimeout(() => {
-    addMsg('ai', `你好，${S.name}！欢迎参加本次技术面试。我将根据岗位要求，深入考察你的 ${S.qTotal} 个技术维度。请尽量用具体的项目案例来回答，展现你的技术深度和思考过程。准备好了吗？`, { animate: true });
-    setTimeout(() => askNext(), 2200);
-  }, 400);
-}
-
-function askNext() {
-  const item = S.q[S.qi];
-  S.topic = item.topic;
-  $('progressText').textContent = `第 ${S.qi + 1}/${S.qTotal} 题`;
-  $('topicBadge').style.display = 'inline-block';
-  $('topicBadge').textContent = item.topic;
-  addMsg('ai', item.q, { animate: true });
-  S.locked = false;
-  $('userInput').disabled = false;
-  $('userInput').focus();
-  updateSendState();
-}
-
-function sendMessage() {
-  if (S.locked) return;
-  const input = $('userInput'), text = input.value.trim();
-  if (!text) return;
-
-  S.locked = true;
-  input.disabled = true;
-  $('sendBtn').disabled = true;
-
-  addMsg('user', text);
-  input.value = ''; input.style.height = 'auto';
-  updateSendState();
-
-  const thinking = addThinking();
-  const delay = 800 + Math.random() * 1200;
-  const followUp = decideFollowUp(text);
-
-  setTimeout(() => {
-    removeThinking(thinking);
-
-    // Score
-    const sc = scoreAnswer(text);
-    sc.topic = S.topic;
-    S.scores.push(sc);
-
-    if (followUp && S.qFollowUps < 2) {
-      S.qFollowUps++;
-      addMsg('ai', followUp, { animate: true, topic: '追问' });
-      $('progressText').textContent = `第 ${S.qi + 1}/${S.qTotal} 题 · 追问中`;
-      S.locked = false;
-      input.disabled = false;
-      input.focus();
-      updateSendState();
-    } else {
-      S.qi++;
-      S.qFollowUps = 0;
-      if (S.qi < S.qTotal) {
-        addMsg('ai', '很好，我们进入下一个话题。', { animate: true });
-        setTimeout(() => askNext(), 1200);
-      } else {
-        addMsg('ai', `感谢你的精彩回答！${S.qTotal} 轮技术考察已全部完成。我已经根据各维度生成了综合评估报告。`, { animate: true });
-        setTimeout(finishInterview, 1800);
-      }
-    }
-  }, delay);
-}
-
-function endInterview() {
-  if (S.locked || S.qi === 0) return;
-  if (!confirm('提前结束面试将根据已完成的题目生成评估报告，确认吗？')) return;
-  S.totalDone = S.qi + 1;
-  addMsg('system', '面试已结束，正在生成评估报告…');
-  $('userInput').disabled = true; $('sendBtn').disabled = true;
-  S.locked = true;
-  setTimeout(finishInterview, 1800);
-}
-
-function updateSendState() {
-  $('sendBtn').disabled = !$('userInput').value.trim() || S.locked;
-}
-
-/* ── Input ── */
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 80) + 'px';
-  updateSendState();
-}
-function handleKeyDown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
-
-/* ═══════════════════════════════════════════════════════════════ */
-/*  REPORT                                                       */
-/* ═══════════════════════════════════════════════════════════════ */
-function finishInterview() {
-  S.locked = true;
-  showView('report');
-  buildReport();
-}
-
-function buildReport() {
-  const avg = averageScores(S.scores);
-  const dims = [
-    { key: 'techDepth', label: '技术深度' },
-    { key: 'architecture', label: '架构设计' },
-    { key: 'communication', label: '沟通表达' },
-    { key: 'engineering', label: '工程素养' },
-    { key: 'problemSolving', label: '问题解决' },
-  ].map(d => ({ ...d, score: avg[d.key] }));
-
-  const overall = Math.round(dims.reduce((s, d) => s + d.score, 0) / dims.length);
-
-  let rating = '良好', ratingBg = 'var(--success-soft)', ratingColor = 'var(--success)';
-  if (overall >= 90) { rating = '卓越'; }
-  else if (overall >= 80) { rating = '优秀'; }
-  else if (overall < 70) { rating = '一般'; ratingBg = 'var(--warning-soft)'; ratingColor = 'var(--warning)'; }
-
-  const hi = dims.filter(d => d.score >= 82).map(d => `${d.label}表现突出（${d.score}分），展现扎实的工程实践和深度思考`);
-  const lo = dims.filter(d => d.score <= 70).map(d => `${d.label}可持续加强（${d.score}分），建议多做架构设计和系统优化实践`);
-  if (!hi.length) hi.push('整体技术能力均衡，具备良好的工程素养');
-  if (!lo.length) lo.push('各维度表现均在良好线以上，暂无明显的短板领域');
-
-  const suggestions = [
-    '针对薄弱维度制定专项学习计划，可结合开源项目或内部技术分享来强化',
-    '养成"先设计、再编码"的习惯，方案评审阶段多做 trade-off 分析',
-    '持续关注行业前沿技术动态，保持对新技术的好奇心和批判性思维',
-  ];
-
-  const actualQTotal = S.totalDone || S.qTotal;
-
-  const html = `
-    <div class="rpt-header">
-      <h1>面试评估报告</h1>
-      <div class="rpt-meta">
-        <span>${S.name}</span><span class="sep"></span>
-        <span>${new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' })}</span><span class="sep"></span>
-        <span>共 ${actualQTotal} 题</span>
-      </div>
-    </div>
-
-    <div class="score-hero">
-      <div class="ring-wrap" id="ringWrap"></div>
-      <div class="score-info">
-        <div class="rating-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-          ${rating}
-        </div>
-        <p class="summary-text">
-          ${S.name} 在本次技术面试中展现了${rating === '卓越' || rating === '优秀' ? '出色' : '扎实'}的技术功底。
-          综合${dims.length}个评估维度，在${dims.sort((a,b) => b.score - a.score).slice(0,2).map(d=>d.label).join('、')}方面表现最为亮眼，
-          ${dims.sort((a,b) => a.score - b.score).slice(0,1).map(d=>d.label+'方面'+'还有提升空间')}。
-          整体来看，候选人与目标岗位的匹配度${rating === '卓越' || rating === '优秀' ? '较高' : '良好'}。
-        </p>
-      </div>
-    </div>
-
-    <div class="radar-section">
-      <h3>能力雷达图</h3>
-      <div class="radar-container" id="radarWrap"></div>
-    </div>
-
-    <div class="detail-grid">
-      <div class="detail-card strengths">
-        <div class="dc-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <h4>优势</h4>
-        <ul>${hi.map(s => `<li>${s}</li>`).join('')}</ul>
-      </div>
-      <div class="detail-card weaknesses">
-        <div class="dc-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M21 12.5A9 9 0 003.5 17"/></svg>
-        </div>
-        <h4>待改进</h4>
-        <ul>${lo.map(s => `<li>${s}</li>`).join('')}</ul>
-      </div>
-      <div class="detail-card suggestions">
-        <div class="dc-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C5CEA" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <h4>提升建议</h4>
-        <ul>${suggestions.map(s => `<li>${s}</li>`).join('')}</ul>
-      </div>
-    </div>
-
-    <div class="rpt-actions">
-      <button class="btn btn-primary btn-lg" onclick="window.print()" style="min-width:180px">下载报告</button>
-      <button class="btn btn-secondary btn-lg" onclick="resetAll()" style="min-width:180px">重新面试</button>
-    </div>
-  `;
-
-  $('reportContent').innerHTML = html;
-  requestAnimationFrame(() => {
-    drawRing(overall);
-    drawRadar(dims);
-  });
-}
-
-/* ── Ring Progress ── */
-function drawRing(score) {
-  const w = $('ringWrap');
-  const r = 73, circ = 2 * Math.PI * r, targetOffset = circ - (circ * score) / 100;
-  w.innerHTML = `
-    <svg width="170" height="170" viewBox="0 0 170 170">
-      <defs>
-        <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#5C5CEA"/><stop offset="100%" stop-color="#10B981"/>
-        </linearGradient>
-      </defs>
-      <circle cx="85" cy="85" r="${r}" fill="none" stroke="#EEEEF2" stroke-width="10"/>
-      <circle cx="85" cy="85" r="${r}" fill="none" stroke="url(#rg)" stroke-width="10" stroke-linecap="round"
-        stroke-dasharray="${circ}" stroke-dashoffset="${circ}" id="ringArc"/>
-    </svg>
-    <div class="ring-center">
-      <span class="big-score" style="color:var(--text)">${score}</span>
-      <span class="big-score-unit">/ 100</span>
-    </div>`;
-  requestAnimationFrame(() => {
-    const a = document.getElementById('ringArc');
-    if (a) a.style.strokeDashoffset = targetOffset;
-  });
-}
-
-/* ── Radar Chart ── */
-function drawRadar(dims) {
-  const w = $('radarWrap'), size = 320, cx = size/2, cy = size/2, r = 128, n = dims.length;
-  const point = (i, radius) => {
-    const a = (2 * Math.PI * i) / n - Math.PI / 2;
-    return { x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) };
-  };
-
-  let grid = '', axes = '';
-  for (let lvl = 1; lvl <= 4; lvl++) {
-    const pts = Array.from({length:n}, (_,i) => point(i, r * lvl / 4));
-    grid += `<polygon points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="#EEEEF2" stroke-width="1.5"/>`;
-  }
-  for (let i = 0; i < n; i++) {
-    const p = point(i, r);
-    axes += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#EEEEF2" stroke-width="1"/>`;
-  }
-
-  const dataPts = dims.map((d,i) => point(i, r * d.score / 100));
-  const poly = dataPts.map(p=>p.x+','+p.y).join(' ');
-
-  let labels = '', scores = '';
-  dims.forEach((d,i) => {
-    const p = point(i, r + 26);
-    labels += `<text x="${p.x}" y="${p.y}" text-anchor="middle" fill="#6B7280" font-size="12" font-weight="500" font-family="var(--font)">${d.label}</text>`;
-    const s = point(i, r + 44);
-    scores += `<text x="${s.x}" y="${s.y}" text-anchor="middle" fill="#18181B" font-size="14" font-weight="700" font-family="var(--font)">${d.score}</text>`;
-  });
-
-  w.innerHTML = `
-    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="max-width:100%;height:auto;">
-      ${grid}${axes}
-      <polygon points="${poly}" fill="rgba(92,92,234,0.12)" stroke="#5C5CEA" stroke-width="2.5" stroke-linejoin="round"/>
-      ${dataPts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#FFF" stroke="#5C5CEA" stroke-width="2.5"/>`).join('')}
-      ${labels}${scores}
-    </svg>`;
-}
-
-/* ═══════════════════════════════════════════════════════════════ */
-/*  RESET                                                        */
-/* ═══════════════════════════════════════════════════════════════ */
-function resetAll() {
-  S = { jd:'', resume:'', q:[], qi:0, qTotal:5, qFollowUps:0, history:[], scores:[], name:'候选人', locked:false, topic:'' };
-  $('jd').value = ''; $('resume').value = '';
-  $('jd-count').textContent = '0 字'; $('resume-count').textContent = '0 字';
-  showView('setup');
-}
-
-/* ═══════════════════════════════════════════════════════════════ */
-/*  INIT                                                         */
-/* ═══════════════════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  const inp = $('userInput');
-  inp.addEventListener('input', () => { updateSendState(); autoResize(inp); });
-});
+  reset(){App.jd='';App.cv='';$('jd').value='';$('resume').value='';JD.count();Resume.count();V('setup')},
+};
 </script>
 </body>
 </html>
