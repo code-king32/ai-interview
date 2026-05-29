@@ -1,17 +1,12 @@
 from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any, Dict
 
-class ReportSection(BaseModel):
-    title: str
-    content: str
 
 class ReportResponse(BaseModel):
-    interview_id: int
-    candidate_name: str
-    job_title: str
-    overall_score: float
-    sections: List[ReportSection]
-    summary: str
-    recommendation: str
-    generated_at: datetime
+    overall_score: Optional[Dict[str, Any]] = None
+    dimension_details: Optional[Dict[str, Any]] = None
+    key_questions_summary: Optional[List[Dict[str, Any]]] = None
+    next_steps: Optional[str] = None
+
+    class Config:
+        from_attributes = True
