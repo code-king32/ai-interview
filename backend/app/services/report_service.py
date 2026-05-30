@@ -42,8 +42,8 @@ class ReportService:
             sc = m.scores
             question_details.append({
                 "question_number": q_num,
-                "question": m.content[:200],
-                "answer": answer_msg[:300] if answer_msg else "（未找到回答）",
+                "question": m.content,
+                "answer": answer_msg or "（未找到回答）",
                 "scores": {d: sc.get(d, 0) for d in dims},
                 "comment": sc.get("comment", ""),
             })
@@ -131,6 +131,17 @@ class ReportService:
         else:
             summary = f"候选人完成了 {total_q} 道题目。由于面试轮次较少，评分仅供参考。综合评估：{recommendation}。"
 
+        # 完整对话记录
+        conversation = []
+        for m in messages:
+            role_label = "面试官" if m.role == MessageRole.INTERVIEWER else "候选人"
+            conversation.append({
+                "role": role_label,
+                "content": m.content,
+                "question_number": m.question_number,
+                "time": m.created_at.isoformat() if m.created_at else None,
+            })
+
         return {
             "candidate": {"id": candidate.id, "name": candidate.name},
             "job": {"id": job.id, "title": job.title},
@@ -147,6 +158,8 @@ class ReportService:
             },
             "dimension_details": dimension_details,
             "key_questions_summary": key_questions_summary,
+            "question_details": question_details,
+            "conversation": conversation,
             "next_steps": _next_steps(recommendation),
         }
 

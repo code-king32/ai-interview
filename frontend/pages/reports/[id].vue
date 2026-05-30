@@ -76,6 +76,20 @@
         <p>{{ report.next_steps }}</p>
       </div>
 
+      <!-- 完整对话记录 -->
+      <div v-if="report.conversation?.length" class="conv-card">
+        <h3>完整面试对话</h3>
+        <div class="conv-list">
+          <div v-for="(msg, idx) in report.conversation" :key="idx" class="conv-msg" :class="msg.role === '面试官' ? 'conv-ai' : 'conv-user'">
+            <div class="conv-head">
+              <span class="conv-role">{{ msg.role }}</span>
+              <span v-if="msg.question_number" class="conv-qnum">第 {{ msg.question_number }} 题</span>
+            </div>
+            <p class="conv-text">{{ msg.content }}</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Actions -->
       <div class="rpt-actions">
         <button class="btn-primary" onclick="window.print()">下载报告</button>
@@ -216,6 +230,18 @@ function drawRing(score: number) {
 .next-steps p { font-size: 14px; color: #71717A; line-height: 1.7 }
 
 /* Actions */
+/* Conversation */
+.conv-card { background: #FFF; border: 1px solid #F0F0F3; border-radius: 20px; padding: 28px 32px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); margin-bottom: 16px }
+.conv-card h3 { font-size: 17px; font-weight: 600; color: #18181B; margin-bottom: 20px; letter-spacing: -0.01em }
+.conv-list { display: flex; flex-direction: column; gap: 10px }
+.conv-msg { padding: 14px 18px; border-radius: 12px }
+.conv-ai { background: #F5F5F7; border-left: 3px solid #5B5BED }
+.conv-user { background: #F0FDF4; border-left: 3px solid #10B981 }
+.conv-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px }
+.conv-role { font-size: 12px; font-weight: 600; color: #71717A }
+.conv-qnum { font-size: 11px; color: #5B5BED; font-weight: 500 }
+.conv-text { font-size: 14px; color: #3F3F46; line-height: 1.65; white-space: pre-wrap }
+
 .rpt-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap }
 .btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 24px; border-radius: 10px; font-size: 15px; font-weight: 500; font-family: inherit; border: none; cursor: pointer; background: #5B5BED; color: #FFF; box-shadow: 0 4px 16px rgba(91,91,237,0.2); transition: all 0.2s; text-decoration: none; min-width: 160px }
 .btn-primary:hover { background: #4F4FE0; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(91,91,237,0.28) }

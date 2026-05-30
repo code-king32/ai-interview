@@ -11,6 +11,8 @@ class ReportResponse(BaseModel):
     overall_score: Optional[Dict[str, Any]] = None
     dimension_details: Optional[Dict[str, Any]] = None
     key_questions_summary: Optional[List[Dict[str, Any]]] = None
+    question_details: Optional[List[Dict[str, Any]]] = None
+    conversation: Optional[List[Dict[str, Any]]] = None
     next_steps: Optional[str] = None
 
     class Config:
