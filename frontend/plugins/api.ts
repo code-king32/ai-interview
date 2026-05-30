@@ -16,11 +16,7 @@ export default defineNuxtPlugin(() => {
         response.data = { code: 0, message: 'success', data: null }
         return response
       }
-      let wrapped = response.data
-      if (Array.isArray(response.data)) {
-        wrapped = { items: response.data, total: response.data.length }
-      }
-      response.data = { code: 0, message: 'success', data: wrapped }
+      response.data = { code: 0, message: 'success', data: response.data }
       return response
     },
     (error) => {
