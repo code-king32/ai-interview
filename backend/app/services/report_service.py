@@ -132,6 +132,11 @@ class ReportService:
             summary = f"候选人完成了 {total_q} 道题目。由于面试轮次较少，评分仅供参考。综合评估：{recommendation}。"
 
         return {
+            "candidate": {"id": candidate.id, "name": candidate.name},
+            "job": {"id": job.id, "title": job.title},
+            "duration": duration,
+            "total_questions": total_q,
+            "generated_at": datetime.utcnow().isoformat(),
             "overall_score": {
                 "technical": tech,
                 "communication": comm,
