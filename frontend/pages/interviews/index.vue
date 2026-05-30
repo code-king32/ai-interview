@@ -84,8 +84,22 @@ const fetchInterviews = async () => {
 
 const deleteInterview = async (iv: any) => {
   if (!confirm(`确定删除面试 #${iv.id}（${iv.job_title || iv.job_id} - ${iv.candidate_name || iv.candidate_id}）吗？`)) return
-  try { await $api.delete(`/interviews/${iv.id}`); await fetchInterviews() }
-  catch (e) { alert('删除失败') }
+  try {
+    const res = await $api.delete(`/interviews/${iv.id}`)
+    console.log('Delete response:', res.status, res.data)
+    await fetchInterviews()
+  } catch (e: any) {
+    console.error('Delete error:', e)
+    const msg = e?.response?.data?.detail || e?.message || '未知错误'
+    alert('删除失败：' + msg)
+  }
+}
+
+// 同样加给岗位和候选人的删除
+const deleteJob = async (id: number) => {
+  if (!confirm('确定删除该岗位吗？')) return
+  try { await $api.delete(`/jobs/${id}`); await fetchInterviews() }
+  catch (e: any) { alert('删除岗位失败：' + (e?.response?.data?.detail || e?.message || '未知错误')) }
 }
 
 onMounted(fetchInterviews)
