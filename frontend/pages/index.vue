@@ -88,8 +88,12 @@ const fetchStats = async () => {
     if (scored.length) {
       const total = scored.reduce((sum: number, i: any) => {
         const s = i.overall_score
-        const val = typeof s === 'object' ? (s.overall || s.technical || 0) : (Number(s) || 0)
-        return sum + val
+        if (typeof s === 'object') {
+          const dims = ['technical','communication','learning','match']
+          const vals = dims.map(d => Number(s[d]) || 0).filter(v => v > 0)
+          return sum + (vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : 0)
+        }
+        return sum + (Number(s) || 0)
       }, 0)
       avgScore.value = (total / scored.length).toFixed(1)
     } else {

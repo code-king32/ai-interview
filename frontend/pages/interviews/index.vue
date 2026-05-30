@@ -70,7 +70,11 @@ const statusStyle = (s: string) => {
 const statusLabel = (s: string) => ({completed:'已完成',in_progress:'进行中',pending:'待开始'} as Record<string,string>)[s] || s
 const scoreDisplay = (s: any) => {
   if (!s) return '-'
-  if (typeof s === 'object') return ((s.overall || s.technical || 0) as number).toFixed(1)
+  if (typeof s === 'object') {
+    const dims = ['technical','communication','learning','match']
+    const vals = dims.map((d: string) => Number(s[d]) || 0).filter((v: number) => v > 0)
+    return vals.length ? (vals.reduce((a: number,b: number) => a+b, 0) / vals.length).toFixed(1) : '-'
+  }
   return Number(s).toFixed(1)
 }
 const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString('zh-CN') : '-'
