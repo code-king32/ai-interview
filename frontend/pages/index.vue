@@ -61,38 +61,42 @@
   </div>
 </template>
 
-<script setup>
-import { useJobStore } from '~/stores/jobStore'
-import { useCandidateStore } from '~/stores/candidateStore'
-
+<script setup lang="ts">
 const { $api } = useNuxtApp()
-const jobStore = useJobStore()
-const candidateStore = useCandidateStore()
 
 const jobCount = ref(0)
 const candidateCount = ref(0)
 const interviewCount = ref(0)
-const avgScore = ref(0)
+const avgScore = ref('0')
 
 const fetchStats = async () => {
-  await jobStore.fetchJobs(1, 1)
-  jobCount.value = jobStore.total
-
-  await candidateStore.fetchCandidates(1, 1)
-  candidateCount.value = candidateStore.total
-
   try {
-    const res = await $api.get('/interviews', { params: { page: 1, page_size: 100 } })
-    if (res.data.code === 0) {
-      const items = res.data.data.items || []
-      interviewCount.value = items.length
-      const scores = items.filter(i => i.overall_score).map(i => i.overall_score)
-      if (scores.length) {
-        avgScore.value = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
-      }
+    const [jobsRes, candRes, intRes] = await Promise.all([
+      $api.get('/jobs'),
+      $api.get('/candidates'),
+      $api.get('/interviews'),
+    ])
+    const jobs: any[] = jobsRes.data.data || []
+    const cands: any[] = candRes.data.data || []
+    const ints: any[] = intRes.data.data || []
+
+    jobCount.value = jobs.length
+    candidateCount.value = cands.length
+    interviewCount.value = ints.length
+
+    const scored = ints.filter((i: any) => i.overall_score)
+    if (scored.length) {
+      const total = scored.reduce((sum: number, i: any) => {
+        const s = i.overall_score
+        const val = typeof s === 'object' ? (s.overall || s.technical || 0) : (Number(s) || 0)
+        return sum + val
+      }, 0)
+      avgScore.value = (total / scored.length).toFixed(1)
+    } else {
+      avgScore.value = '-'
     }
-  } catch (error) {
-    console.error('获取面试数据失败', error)
+  } catch (e) {
+    console.error('获取统计数据失败', e)
   }
 }
 
