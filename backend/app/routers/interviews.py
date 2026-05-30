@@ -34,7 +34,20 @@ def create_interview(interview: InterviewCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=List[InterviewResponse])
 def get_interviews(db: Session = Depends(get_db)):
-    return db.query(Interview).all()
+    interviews = db.query(Interview).all()
+    result = []
+    for iv in interviews:
+        data = {
+            "id": iv.id, "job_id": iv.job_id, "candidate_id": iv.candidate_id,
+            "status": iv.status, "started_at": iv.started_at,
+            "completed_at": iv.completed_at, "overall_score": iv.overall_score,
+        }
+        job = db.query(Job).filter(Job.id == iv.job_id).first()
+        candidate = db.query(Candidate).filter(Candidate.id == iv.candidate_id).first()
+        data["job_title"] = job.title if job else None
+        data["candidate_name"] = candidate.name if candidate else None
+        result.append(data)
+    return result
 
 
 @router.get("/{interview_id}", response_model=InterviewResponse)

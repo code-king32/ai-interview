@@ -23,6 +23,8 @@ class InterviewResponse(InterviewBase):
     started_at: Optional[datetime]
     completed_at: Optional[datetime]
     overall_score: Optional[dict]
+    job_title: Optional[str] = None
+    candidate_name: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -30,8 +30,8 @@
         <tbody>
           <tr v-for="interview in interviews" :key="interview.id" style="border-bottom: 1px solid #e5e7eb;">
             <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #111827;">{{ interview.id }}</td>
-            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; font-weight: 500; color: #111827;">岗位 #{{ interview.job_id }}</td>
-            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #6b7280;">候选人 #{{ interview.candidate_id }}</td>
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; font-weight: 500; color: #111827;">{{ interview.job_title || '岗位 #' + interview.job_id }}</td>
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #6b7280;">{{ interview.candidate_name || '候选人 #' + interview.candidate_id }}</td>
             <td style="padding: 20px 24px; white-space: nowrap;">
               <span :style="getStatusStyle(interview.status)" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">
                 {{ statusText(interview.status) }}
