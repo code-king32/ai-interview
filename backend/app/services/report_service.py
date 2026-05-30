@@ -126,7 +126,7 @@ class ReportService:
             summary = f"候选人在本次技术面试中完成了 {total_q} 道题目的考察，综合评分 {overall} 分。"
             best_dim = max(dimension_details.items(), key=lambda x: x[1]["score"])
             worst_dim = min(dimension_details.items(), key=lambda x: x[1]["score"])
-            summary += f"在{dim_label(best_dim[0])}方面表现最为突出（{best_dim[1]['score']}分），{dim_label(worst_dim[0])}方面仍有提升空间。"
+            summary += f"在{_dim_label(best_dim[0])}方面表现最为突出（{best_dim[1]['score']}分），{_dim_label(worst_dim[0])}方面仍有提升空间。"
             summary += f"整体评估：{recommendation}。"
         else:
             summary = f"候选人完成了 {total_q} 道题目。由于面试轮次较少，评分仅供参考。综合评估：{recommendation}。"
