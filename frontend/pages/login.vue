@@ -83,10 +83,7 @@ const submit = async () => {
       }
     }
     const r = await $api.post('/auth/login', { username: u, password: p })
-    console.log('Login raw response:', r.data)
-    let user = r.data?.data
-    if (!user?.role && r.data?.role) user = r.data
-    if (!user?.role) { error.value = '登录响应异常，请检查网络'; loading.value = false; return }
+    const user = r.data.data
     if (user.role !== role.value) {
       error.value = `该账号是「${user.role === 'hr' ? '面试官/HR' : '求职者'}」账号，请切换身份后登录`
       loading.value = false
