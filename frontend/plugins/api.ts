@@ -8,8 +8,9 @@ export default defineNuxtPlugin(() => {
     timeout: 60000,
   })
 
-  // 请求拦截器：自动附加 role 参数
+  // 请求拦截器：自动附加 role 参数 + ngrok 跳过警告
   api.interceptors.request.use((reqConfig) => {
+    reqConfig.headers['ngrok-skip-browser-warning'] = 'true'
     let role = ''
     try {
       if (typeof window !== 'undefined') {
