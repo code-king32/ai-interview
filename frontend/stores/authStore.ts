@@ -1,10 +1,16 @@
 import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', () => {
-  const role = ref('')
-  const username = ref('')
+  // 初始化时直接从 localStorage 读取
+  const storedRole = typeof window !== 'undefined' ? (localStorage.getItem('role') || '') : ''
+  const storedUser = typeof window !== 'undefined' ? (localStorage.getItem('user') || '{}') : '{}'
+  let storedName = ''
+  try { storedName = JSON.parse(storedUser).username || '' } catch {}
+
+  const role = ref(storedRole)
+  const username = ref(storedName)
   const isHR = computed(() => role.value === 'hr')
-  const isLoggedIn = computed(() => !!role.value)
+  const isLoggedIn = computed(() => !!role.value && role.value !== '')
 
   const login = (r: string, name: string) => {
     role.value = r
@@ -20,17 +26,5 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.clear()
   }
 
-  // 从 localStorage 恢复
-  const restore = () => {
-    if (!role.value) {
-      const r = localStorage.getItem('role') || ''
-      if (r) {
-        role.value = r
-        const u = localStorage.getItem('user') || '{}'
-        try { username.value = JSON.parse(u).username || '' } catch {}
-      }
-    }
-  }
-
-  return { role, username, isHR, isLoggedIn, login, logout, restore }
+  return { role, username, isHR, isLoggedIn, login, logout }
 })

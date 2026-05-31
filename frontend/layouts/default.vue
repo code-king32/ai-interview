@@ -48,8 +48,6 @@
 const router = useRouter()
 const auth = useAuthStore()
 
-onMounted(() => { auth.restore() })
-
 const logout = () => {
   auth.logout()
   router.push('/login')
