@@ -6,6 +6,8 @@ class JobBase(BaseModel):
     title: str
     description: Optional[str] = None
     requirements: Optional[str] = None
+    source: Optional[str] = "seeker"
+
 
 class JobCreate(JobBase):
     pass

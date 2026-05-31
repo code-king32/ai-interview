@@ -8,6 +8,18 @@ export default defineNuxtPlugin(() => {
     timeout: 60000,
   })
 
+  // 请求拦截器：自动附加 role 参数
+  api.interceptors.request.use((reqConfig) => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('role')
+      if (role && reqConfig.url && !reqConfig.url.startsWith('/api/auth') && !reqConfig.url.startsWith('/api/invite')) {
+        const sep = reqConfig.url.includes('?') ? '&' : '?'
+        reqConfig.url = `${reqConfig.url}${sep}role=${role}`
+      }
+    }
+    return reqConfig
+  })
+
   // 响应拦截器：统一包装为 { code, message, data }
   api.interceptors.response.use(
     (response) => {

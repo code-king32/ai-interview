@@ -8,16 +8,20 @@ from app.schemas import JobCreate, JobResponse, JobUpdate
 router = APIRouter()
 
 @router.post("/", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
-def create_job(job: JobCreate, db: Session = Depends(get_db)):
-    new_job = Job(**job.dict())
+def create_job(job: JobCreate, role: str = "seeker", db: Session = Depends(get_db)):
+    new_job = Job(**job.model_dump())
+    if role == "hr":
+        new_job.source = "hr"
     db.add(new_job)
     db.commit()
     db.refresh(new_job)
     return new_job
 
 @router.get("/", response_model=List[JobResponse])
-def get_jobs(db: Session = Depends(get_db)):
-    jobs = db.query(Job).all()
+def get_jobs(role: str = "seeker", db: Session = Depends(get_db)):
+    jobs = db.query(Job).filter(Job.source == role).all()
+    if not jobs:
+        jobs = db.query(Job).all()
     return jobs
 
 @router.get("/{job_id}", response_model=JobResponse)

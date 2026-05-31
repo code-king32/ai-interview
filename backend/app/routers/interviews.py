@@ -33,8 +33,10 @@ def create_interview(interview: InterviewCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=List[InterviewResponse])
-def get_interviews(db: Session = Depends(get_db)):
-    interviews = db.query(Interview).all()
+def get_interviews(role: str = "seeker", db: Session = Depends(get_db)):
+    interviews = db.query(Interview).join(Job, Interview.job_id == Job.id).filter(Job.source == role).all()
+    if not interviews:
+        interviews = db.query(Interview).all()
     result = []
     for iv in interviews:
         data = {
