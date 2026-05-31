@@ -84,9 +84,10 @@ const submit = async () => {
     }
     const r = await $api.post('/auth/login', { username: u, password: p })
     const user = r.data.data
-    useAuthStore().login(user.role, user.username)
-    // 等 localStorage 写完后整页跳转
-    setTimeout(() => { window.location.href = '/' }, 100)
+    // 最简单：角色跟 URL 走
+    localStorage.setItem('role', user.role)
+    localStorage.setItem('token', 'ok')
+    window.location.href = `/?role=${user.role}`
   } catch (e: any) {
     error.value = e?.response?.data?.detail || '请求失败'
     console.error(e)

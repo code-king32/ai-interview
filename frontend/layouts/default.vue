@@ -1,57 +1,52 @@
 <template>
-  <div v-if="!auth.isLoggedIn" class="loading">加载中…</div>
+  <div v-if="!role" class="loading">加载中…</div>
   <div v-else class="app-layout">
     <header class="app-header">
       <div class="header-left">
         <span class="logo">🤖</span>
-        <span class="title">{{ auth.isHR ? 'AI 面试系统' : 'AI 面试陪练' }}</span>
+        <span class="title">{{ isHR ? 'AI 面试系统' : 'AI 面试陪练' }}</span>
       </div>
       <div class="header-right">
-        <span>{{ auth.isHR ? 'HR 管理员' : '求职者' }}</span>
+        <span>{{ isHR ? 'HR 管理员' : '求职者' }}</span>
         <button @click="logout">退出登录</button>
       </div>
     </header>
-
     <div class="layout-body">
       <aside class="sidebar">
         <nav>
-          <NuxtLink to="/" class="menu-item" :class="{ active: $route.path === '/' }">
-            <span>🏠</span> 首页
-          </NuxtLink>
-          <template v-if="auth.isHR">
-            <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }">
-              <span>📋</span> 岗位管理
-            </NuxtLink>
-            <NuxtLink to="/candidates" class="menu-item" :class="{ active: $route.path.startsWith('/candidates') }">
-              <span>👥</span> 候选人管理
-            </NuxtLink>
+          <NuxtLink to="/" class="menu-item" :class="{ active: $route.path === '/' }"><span>🏠</span> 首页</NuxtLink>
+          <template v-if="isHR">
+            <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }"><span>📋</span> 岗位管理</NuxtLink>
+            <NuxtLink to="/candidates" class="menu-item" :class="{ active: $route.path.startsWith('/candidates') }"><span>👥</span> 候选人管理</NuxtLink>
           </template>
           <template v-else>
-            <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }">
-              <span>🎯</span> 目标岗位
-            </NuxtLink>
+            <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }"><span>🎯</span> 目标岗位</NuxtLink>
           </template>
-          <NuxtLink to="/interviews" class="menu-item" :class="{ active: $route.path.startsWith('/interviews') }">
-            <span>{{ auth.isHR ? '🎯' : '📝' }}</span> {{ auth.isHR ? '面试记录' : '练习记录' }}
-          </NuxtLink>
+          <NuxtLink to="/interviews" class="menu-item" :class="{ active: $route.path.startsWith('/interviews') }"><span>{{ isHR ? '🎯' : '📝' }}</span> {{ isHR ? '面试记录' : '练习记录' }}</NuxtLink>
         </nav>
       </aside>
-
-      <main class="main-content">
-        <slot />
-      </main>
+      <main class="main-content"><slot /></main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const route = useRoute()
 const router = useRouter()
-const auth = useAuthStore()
 
-const logout = () => {
-  auth.logout()
-  router.push('/login')
-}
+// 角色来源：URL > localStorage
+const role = computed(() => {
+  const urlRole = route.query.role as string
+  if (urlRole) { localStorage.setItem('role', urlRole); return urlRole }
+  if (typeof window !== 'undefined') return localStorage.getItem('role') || ''
+  return ''
+})
+const isHR = computed(() => role.value === 'hr')
+
+// 没角色跳登录
+watchEffect(() => { if (role.value === '' && route.path !== '/login') { router.push('/login') } })
+
+const logout = () => { localStorage.clear(); router.push('/login') }
 </script>
 
 <style scoped>

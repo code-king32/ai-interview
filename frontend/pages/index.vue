@@ -91,8 +91,8 @@ const recent = ref<any[]>([])
 const hrStats = ref<any[]>([])
 const skStats = ref<any[]>([])
 
-const auth = useAuthStore()
-const isHR = computed(() => auth.isHR)
+const route = useRoute()
+const isHR = computed(() => (route.query.role as string) === 'hr' || localStorage.getItem('role') === 'hr')
 
 const normalize = (s: string) => String(s || '').toLowerCase()
 const statusDot = (s: string) => ({completed:{background:'#10B981'},in_progress:{background:'#5B5BED'},pending:{background:'#F59E0B'}})[s]||{background:'#D1D5DB'}
