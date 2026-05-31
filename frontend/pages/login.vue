@@ -5,59 +5,64 @@
       <div class="brand-row">
         <div class="brand-icon">🤖</div>
         <h1>AI 面试平台</h1>
-        <p>{{ isRegister ? '创建账号开始使用' : '选择身份或登录已有账号' }}</p>
       </div>
 
-      <!-- 快速入口（登录模式） -->
-      <div v-if="!isRegister" class="role-cards">
-        <button class="role-card" @click="quickLogin('seeker')">
-          <div class="role-icon-wrap seeker">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg>
-          </div>
-          <div class="role-info">
-            <h3>我是求职者</h3>
-            <p>上传简历，AI 模拟面试</p>
-          </div>
-          <span class="role-arrow">→</span>
-        </button>
+      <!-- Step 1: 选择身份 -->
+      <template v-if="step === 'role'">
+        <p class="step-hint">请选择你的身份</p>
+        <div class="role-cards">
+          <button class="role-card" @click="selectRole('seeker')">
+            <div class="role-icon-wrap seeker">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg>
+            </div>
+            <div class="role-info">
+              <h3>求职者</h3>
+              <p>AI 模拟面试，针对性提升</p>
+            </div>
+            <span class="role-arrow">→</span>
+          </button>
 
-        <button class="role-card" @click="quickLogin('hr')">
-          <div class="role-icon-wrap hr">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          </div>
-          <div class="role-info">
-            <h3>我是面试官 / HR</h3>
-            <p>管理岗位，评估候选人</p>
-          </div>
-          <span class="role-arrow">→</span>
-        </button>
-      </div>
-
-      <div class="divider"><span>或使用账号登录</span></div>
-
-      <!-- 表单 -->
-      <div class="form-area">
-        <div class="input-wrap">
-          <input v-model="username" type="text" placeholder="用户名" @keyup.enter="handleSubmit" />
+          <button class="role-card" @click="selectRole('hr')">
+            <div class="role-icon-wrap hr">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="role-info">
+              <h3>面试官 / HR</h3>
+              <p>管理岗位，评估候选人</p>
+            </div>
+            <span class="role-arrow">→</span>
+          </button>
         </div>
-        <div class="input-wrap">
-          <input v-model="password" type="password" placeholder="密码" @keyup.enter="handleSubmit" />
-        </div>
-        <div v-if="isRegister" class="input-wrap">
-          <select v-model="role" class="role-select">
-            <option value="seeker">我是求职者</option>
-            <option value="hr">我是面试官 / HR</option>
-          </select>
-        </div>
-        <button class="submit-btn" :disabled="loading" @click="handleSubmit">
-          {{ loading ? '处理中…' : (isRegister ? '注册' : '登录') }}
-        </button>
-      </div>
+      </template>
 
-      <div class="toggle-link">
-        {{ isRegister ? '已有账号？' : '没有账号？' }}
-        <a href="#" @click.prevent="isRegister = !isRegister">{{ isRegister ? '去登录' : '去注册' }}</a>
-      </div>
+      <!-- Step 2: 登录 / 注册 -->
+      <template v-else>
+        <div class="role-badge" :class="selectedRole">
+          {{ selectedRole === 'seeker' ? '🧑‍💻 求职者' : '💼 面试官 / HR' }}
+        </div>
+
+        <div class="form-area">
+          <div class="input-wrap">
+            <input v-model="username" type="text" placeholder="用户名" @keyup.enter="handleSubmit" />
+          </div>
+          <div class="input-wrap">
+            <input v-model="password" type="password" placeholder="密码" @keyup.enter="handleSubmit" />
+          </div>
+          <div v-if="isRegister" class="input-wrap">
+            <input v-model="confirmPassword" type="password" placeholder="确认密码" @keyup.enter="handleSubmit" />
+          </div>
+          <button class="submit-btn" :disabled="loading" @click="handleSubmit">
+            {{ loading ? '处理中…' : (isRegister ? '注册' : '登录') }}
+          </button>
+        </div>
+
+        <div class="toggle-link">
+          <a href="#" @click.prevent="goBack">← 重新选择身份</a>
+          <span class="sep">|</span>
+          {{ isRegister ? '已有账号？' : '没有账号？' }}
+          <a href="#" @click.prevent="isRegister = !isRegister">{{ isRegister ? '去登录' : '去注册' }}</a>
+        </div>
+      </template>
 
       <div v-if="error" class="error-msg">{{ error }}</div>
     </div>
@@ -69,18 +74,24 @@ definePageMeta({ layout: false })
 const router = useRouter()
 const { $api } = useNuxtApp()
 
+const step = ref<'role' | 'auth'>('role')
+const selectedRole = ref('')
 const username = ref('')
 const password = ref('')
-const role = ref('seeker')
+const confirmPassword = ref('')
 const isRegister = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-// 快速免密登录
-const quickLogin = (r: string) => {
-  localStorage.setItem('role', r)
-  localStorage.setItem('token', 'guest')
-  router.push('/')
+const selectRole = (role: string) => {
+  selectedRole.value = role
+  step.value = 'auth'
+  error.value = ''
+}
+
+const goBack = () => {
+  step.value = 'role'
+  error.value = ''
 }
 
 const handleSubmit = async () => {
@@ -89,15 +100,19 @@ const handleSubmit = async () => {
     error.value = '请输入用户名和密码'
     return
   }
+  if (isRegister.value && password.value !== confirmPassword.value) {
+    error.value = '两次密码输入不一致'
+    return
+  }
   loading.value = true
   try {
     if (isRegister.value) {
-      await $api.post('/auth/register', { username: username.value, password: password.value, role: role.value })
+      await $api.post('/auth/register', { username: username.value, password: password.value, role: selectedRole.value })
     }
     const res = await $api.post('/auth/login', { username: username.value, password: password.value })
     const user = res.data.data
     localStorage.setItem('role', user.role)
-    localStorage.setItem('token', 'mock-token')
+    localStorage.setItem('token', 'ok')
     localStorage.setItem('user', JSON.stringify({ id: user.id, username: user.username }))
     router.push('/')
   } catch (e: any) {
@@ -109,6 +124,7 @@ const handleSubmit = async () => {
 onMounted(() => {
   localStorage.removeItem('token')
   localStorage.removeItem('role')
+  localStorage.removeItem('user')
 })
 </script>
 
@@ -129,9 +145,10 @@ onMounted(() => {
   max-width: 520px;
   width: 100%;
   border: 1px solid #F0F0F3;
+  min-height: 400px;
 }
 
-.brand-row { text-align: center; margin-bottom: 32px; }
+.brand-row { text-align: center; margin-bottom: 28px; }
 .brand-icon {
   width: 48px; height: 48px;
   background: linear-gradient(135deg, #5B5BED, #A78BFA);
@@ -139,13 +156,14 @@ onMounted(() => {
   font-size: 24px; margin-bottom: 14px;
   box-shadow: 0 6px 20px rgba(91,91,237,0.2);
 }
-.brand-row h1 { font-size: 24px; font-weight: 700; color: #18181B; letter-spacing: -0.02em; margin-bottom: 4px; }
-.brand-row p { font-size: 14px; color: #A1A1AA; }
+.brand-row h1 { font-size: 24px; font-weight: 700; color: #18181B; letter-spacing: -0.02em; }
+
+.step-hint { text-align: center; font-size: 14px; color: #A1A1AA; margin-bottom: 20px; }
 
 .role-cards { display: flex; flex-direction: column; gap: 10px; }
 .role-card {
   display: flex; align-items: center; gap: 14px;
-  padding: 16px 20px; border: 1.5px solid #F0F0F3; border-radius: 12px;
+  padding: 18px 20px; border: 1.5px solid #F0F0F3; border-radius: 12px;
   background: #FFF; cursor: pointer; text-align: left; font-family: inherit;
   transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
 }
@@ -158,21 +176,20 @@ onMounted(() => {
 .role-info p { font-size: 12px; color: #A1A1AA; }
 .role-arrow { font-size: 16px; color: #D4D4D8; }
 
-.divider {
-  display: flex; align-items: center; gap: 14px; margin: 24px 0;
-  color: #D4D4D8; font-size: 12px;
+.role-badge {
+  text-align: center; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500;
+  margin-bottom: 20px;
 }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #F0F0F3; }
+.role-badge.seeker { background: rgba(16,185,129,0.08); color: #059669; }
+.role-badge.hr { background: rgba(91,91,237,0.08); color: #5B5BED; }
 
 .form-area { display: flex; flex-direction: column; gap: 12px; }
-.input-wrap input, .role-select {
+.input-wrap input {
   width: 100%; padding: 12px 14px; border: 1.5px solid #E8E8ED; border-radius: 10px;
   font-size: 15px; font-family: inherit; outline: none;
-  transition: border-color 0.2s;
-  color: #18181B; background: #FFF;
+  transition: border-color 0.2s; color: #18181B; background: #FFF;
 }
-.input-wrap input:focus, .role-select:focus { border-color: #5B5BED; }
-.role-select { cursor: pointer; }
+.input-wrap input:focus { border-color: #5B5BED; }
 
 .submit-btn {
   width: 100%; padding: 12px; border-radius: 10px; border: none;
@@ -182,9 +199,10 @@ onMounted(() => {
 .submit-btn:hover:not(:disabled) { background: #4F4FE0; }
 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.toggle-link { text-align: center; margin-top: 18px; font-size: 13px; color: #A1A1AA; }
+.toggle-link { text-align: center; margin-top: 18px; font-size: 13px; color: #A1A1AA; display: flex; justify-content: center; gap: 10px; }
 .toggle-link a { color: #5B5BED; font-weight: 500; text-decoration: none; }
 .toggle-link a:hover { text-decoration: underline; }
+.toggle-link .sep { color: #E8E8ED; }
 
 .error-msg { margin-top: 12px; padding: 10px 14px; background: #FEF2F2; color: #DC2626; border-radius: 8px; font-size: 13px; text-align: center; }
 </style>
