@@ -143,6 +143,8 @@ const handleSubmit = async () => {
     localStorage.setItem('token', 'ok')
     localStorage.setItem('user', JSON.stringify({ id: user.id, username: user.username }))
     document.cookie = `role=${user.role};path=/;max-age=86400`
+    // Nuxt 跨组件状态，layout 立即可用
+    useState('user-role').value = user.role
     router.push('/')
   } catch (e: any) {
     error.value = e?.response?.data?.detail || '登录失败，请重试'

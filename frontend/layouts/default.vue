@@ -48,25 +48,22 @@
 
 <script setup lang="ts">
 const router = useRouter()
-const isHR = ref(false)
 
-// 客户端读取真实角色
-const syncRole = () => {
-  if (typeof window === 'undefined') return
-  const r = localStorage.getItem('role') || ''
-  isHR.value = r === 'hr'
-}
+// 用 Nuxt useState 跨组件共享，登录后立即生效
+const roleState = useState<string>('user-role', () => '')
+const isHR = computed(() => roleState.value === 'hr')
 
-onMounted(syncRole)
-// 监听 storage 变化（多标签页场景）
-if (typeof window !== 'undefined') {
-  window.addEventListener('storage', syncRole)
-}
+// 客户端首次加载时从 localStorage 恢复
+onMounted(() => {
+  if (!roleState.value && typeof window !== 'undefined') {
+    roleState.value = localStorage.getItem('role') || ''
+  }
+})
 
 const logout = () => {
   localStorage.clear()
   document.cookie = 'role=;path=/;max-age=0'
-  isHR.value = false
+  roleState.value = ''
   router.push('/login')
 }
 </script>
