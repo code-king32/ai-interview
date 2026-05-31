@@ -1,120 +1,179 @@
 <template>
-  <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow-x: hidden;">
-    <div class="w-full max-w-md px-4" style="box-sizing: border-box;">
-      <div style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); box-sizing: border-box; width: 100%;">
-        
-        <!-- 图标和标题同一行居中 -->
-        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px;">
-          <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-            <span style="font-size: 24px;">🤖</span>
-          </div>
-          <h1 style="color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">AI 面试平台</h1>
-        </div>
-        
-        <p style="color: #9ca3af; text-align: center; font-size: 14px; margin-top: 4px; margin-bottom: 32px;">智能面试 · 精准评估</p>
+  <div class="login-bg">
+    <div class="login-card">
+      <!-- Brand -->
+      <div class="brand-row">
+        <div class="brand-icon">🤖</div>
+        <h1>AI 面试平台</h1>
+        <p>选择你的身份，开始智能面试之旅</p>
+      </div>
 
-        <!-- 用户名输入框 -->
-        <div style="margin-bottom: 20px; width: 100%;">
-          <input 
-            v-model="username"
-            type="text"
-            style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; color: white; font-size: 16px; outline: none; transition: all 0.2s; box-sizing: border-box;"
-            placeholder="用户名"
-            @focus="e => e.target.style.borderColor = '#3b82f6'"
-            @blur="e => e.target.style.borderColor = 'rgba(255,255,255,0.25)'"
-            @keyup.enter="handleLogin"
-          />
-        </div>
-
-        <!-- 密码输入框 -->
-        <div style="margin-bottom: 28px; width: 100%;">
-          <div style="position: relative; width: 100%;">
-            <input 
-              v-model="password"
-              :type="showPassword ? 'text' : 'password'"
-              style="width: 100%; padding: 12px 40px 12px 16px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; color: white; font-size: 16px; outline: none; transition: all 0.2s; box-sizing: border-box;"
-              placeholder="密码"
-              @focus="e => e.target.style.borderColor = '#3b82f6'"
-              @blur="e => e.target.style.borderColor = 'rgba(255,255,255,0.25)'"
-              @keyup.enter="handleLogin"
-            />
-            <button
-              type="button"
-              @click="showPassword = !showPassword"
-              style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #9ca3af; display: flex; align-items: center; padding: 0;"
-            >
-              <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- 登录按钮 -->
-        <button
-          @click="handleLogin"
-          :disabled="loading"
-          style="width: 100%; background: #2563eb; color: white; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 16px; border: none; cursor: pointer; transition: all 0.2s; box-sizing: border-box;"
-          @mouseenter="e => e.target.style.background = '#1d4ed8'"
-          @mouseleave="e => e.target.style.background = '#2563eb'"
-        >
-          <span v-if="!loading">登录</span>
-          <span v-else class="flex items-center justify-center gap-2">
-            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24" width="20" height="20">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="white" stroke-width="4" />
-              <path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+      <!-- 身份选择卡片 -->
+      <div class="role-cards">
+        <button class="role-card" @click="login('seeker')">
+          <div class="role-icon-wrap seeker">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8"/>
+              <path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/>
             </svg>
-            登录中...
-          </span>
+          </div>
+          <div class="role-info">
+            <h3>我是求职者</h3>
+            <p>上传简历，设置目标岗位<br>AI 模拟面试，针对性提升</p>
+          </div>
+          <span class="role-arrow">→</span>
         </button>
 
-        <!-- 默认账号提示 -->
-        <div style="margin-top: 24px; text-align: center;">
-          <p style="color: #6b7280; font-size: 12px;">默认账号：admin / 123456</p>
-        </div>
+        <button class="role-card" @click="login('hr')">
+          <div class="role-icon-wrap hr">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <div class="role-info">
+            <h3>我是面试官 / HR</h3>
+            <p>管理岗位和候选人<br>发起 AI 面试，查看评估报告</p>
+          </div>
+          <span class="role-arrow">→</span>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 definePageMeta({ layout: false })
 
 const router = useRouter()
-const username = ref('')
-const password = ref('')
-const loading = ref(false)
-const showPassword = ref(false)
 
-const handleLogin = async () => {
-  if (!username.value || !password.value) {
-    alert('请输入用户名和密码')
-    return
-  }
-  loading.value = true
-  setTimeout(() => {
-    if (username.value === 'admin' && password.value === '123456') {
-      localStorage.setItem('token', 'mock-token')
-      localStorage.setItem('user', JSON.stringify({ username: username.value }))
-      router.push('/')
-    } else {
-      alert('用户名或密码错误')
-    }
-    loading.value = false
-  }, 800)
+const login = (role: 'seeker' | 'hr') => {
+  localStorage.setItem('role', role)
+  localStorage.setItem('token', 'mock-token')
+  router.push('/')
 }
 </script>
 
 <style scoped>
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% -20%, rgba(91,91,237,0.06) 0%, transparent 60%),
+    #FAFAFA;
 }
-.animate-spin {
-  animation: spin 1s linear infinite;
+
+.login-card {
+  background: #FFF;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 10px 40px rgba(0,0,0,0.06);
+  padding: 40px;
+  max-width: 560px;
+  width: 100%;
+  border: 1px solid #F0F0F3;
+}
+
+.brand-row {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.brand-icon {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, #5B5BED, #A78BFA);
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(91,91,237,0.25);
+}
+.brand-row h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #18181B;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.brand-row p {
+  font-size: 14px;
+  color: #A1A1AA;
+}
+
+.role-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.role-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1.5px solid #F0F0F3;
+  border-radius: 14px;
+  background: #FFF;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+  text-align: left;
+  font-family: inherit;
+}
+.role-card:hover {
+  border-color: #5B5BED;
+  box-shadow: 0 4px 20px rgba(91,91,237,0.1);
+  transform: translateY(-2px);
+}
+
+.role-icon-wrap {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.role-icon-wrap.seeker {
+  background: rgba(16,185,129,0.08);
+  color: #10B981;
+}
+.role-icon-wrap.hr {
+  background: rgba(91,91,237,0.08);
+  color: #5B5BED;
+}
+
+.role-info {
+  flex: 1;
+  min-width: 0;
+}
+.role-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #18181B;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+.role-info p {
+  font-size: 13px;
+  color: #A1A1AA;
+  line-height: 1.5;
+}
+
+.role-arrow {
+  font-size: 18px;
+  color: #D4D4D8;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.role-card:hover .role-arrow {
+  color: #5B5BED;
+  transform: translateX(4px);
+}
+
+@media (max-width: 480px) {
+  .login-card { padding: 28px 20px; }
+  .role-card { padding: 16px; gap: 12px; }
 }
 </style>

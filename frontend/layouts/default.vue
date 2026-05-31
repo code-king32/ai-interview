@@ -4,10 +4,10 @@
     <header class="app-header">
       <div class="header-left">
         <span class="logo">🤖</span>
-        <span class="title">AI 面试陪练</span>
+        <span class="title">{{ isHR ? 'AI 面试系统' : 'AI 面试陪练' }}</span>
       </div>
       <div class="header-right">
-        <span>管理员</span>
+        <span>{{ isHR ? 'HR 管理员' : '求职者' }}</span>
         <button @click="logout">退出登录</button>
       </div>
     </header>
@@ -19,11 +19,21 @@
           <NuxtLink to="/" class="menu-item" :class="{ active: $route.path === '/' }">
             <span>🏠</span> 首页
           </NuxtLink>
-          <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }">
-            <span>🎯</span> 目标岗位
-          </NuxtLink>
+          <template v-if="isHR">
+            <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }">
+              <span>📋</span> 岗位管理
+            </NuxtLink>
+            <NuxtLink to="/candidates" class="menu-item" :class="{ active: $route.path.startsWith('/candidates') }">
+              <span>👥</span> 候选人管理
+            </NuxtLink>
+          </template>
+          <template v-else>
+            <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }">
+              <span>🎯</span> 目标岗位
+            </NuxtLink>
+          </template>
           <NuxtLink to="/interviews" class="menu-item" :class="{ active: $route.path.startsWith('/interviews') }">
-            <span>📝</span> 练习记录
+            <span>{{ isHR ? '🎯' : '📝' }}</span> {{ isHR ? '面试记录' : '练习记录' }}
           </NuxtLink>
         </nav>
       </aside>
@@ -36,11 +46,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const router = useRouter()
+const isHR = ref(false)
+
+onMounted(() => {
+  isHR.value = localStorage.getItem('role') === 'hr'
+})
+
 const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
+  localStorage.removeItem('role')
   router.push('/login')
 }
 </script>
