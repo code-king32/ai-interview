@@ -84,6 +84,12 @@ const submit = async () => {
     const r = await $api.post('/auth/login', { username: u, password: p })
     console.log('Login:', r.data)
     const user = r.data.data
+    // 校验返回角色是否匹配选择的身份
+    if (user.role !== role.value) {
+      error.value = `该账号是「${user.role === 'hr' ? '面试官/HR' : '求职者'}」账号，请切换身份后登录`
+      loading.value = false
+      return
+    }
     useAuthStore().login(user.role, user.username)
     window.location.href = '/'
   } catch (e: any) {
