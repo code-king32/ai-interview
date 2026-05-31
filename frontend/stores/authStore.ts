@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', () => {
   const storedUser = typeof window !== 'undefined' ? (localStorage.getItem('user') || '{}') : '{}'
   let storedName = ''
   try { storedName = JSON.parse(storedUser).username || '' } catch {}
+  console.log('[authStore] init: role="' + storedRole + '" isHR=' + (storedRole === 'hr'))
 
   const role = ref(storedRole)
   const username = ref(storedName)
