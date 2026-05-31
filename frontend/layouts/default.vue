@@ -1,7 +1,6 @@
 <template>
-  <ClientOnly>
-    <div class="app-layout">
-      <header class="app-header">
+  <div class="app-layout">
+    <header class="app-header">
         <div class="header-left">
           <span class="logo">🤖</span>
           <span class="title">{{ isHR ? 'AI 面试系统' : 'AI 面试陪练' }}</span>
@@ -42,7 +41,6 @@
         </main>
       </div>
     </div>
-  </ClientOnly>
 </template>
 
 <script setup lang="ts">
