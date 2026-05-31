@@ -31,6 +31,7 @@
             <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #6b7280;">{{ job.created_at }}</td>
             <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px;">
               <button @click="openEditModal(job)" style="color: #2563eb; margin-right: 12px; background: none; border: none; cursor: pointer;">编辑</button>
+              <button @click="openInviteModal(job)" style="color: #10B981; margin-right: 12px; background: none; border: none; cursor: pointer;">邀请</button>
               <button @click="deleteJob(job.id)" style="color: #dc2626; background: none; border: none; cursor: pointer;">删除</button>
             </td>
           </tr>
@@ -54,6 +55,26 @@
           <button @click="closeModal" style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 8px;">取消</button>
           <button @click="submitForm" style="background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; border: none;">保存</button>
         </div>
+      </div>
+    </div>
+    <!-- 邀请弹窗 -->
+    <div v-if="inviteModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50;" @click.self="inviteModal = false">
+      <div style="background: white; border-radius: 14px; width: 100%; max-width: 500px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+        <h2 style="font-size: 18px; font-weight: 700; color: #18181B; margin-bottom: 4px;">邀请候选人</h2>
+        <p style="font-size: 13px; color: #A1A1AA; margin-bottom: 18px;">岗位：{{ inviteJob?.title }}</p>
+
+        <button v-if="!inviteLink" @click="generateInvite" :disabled="generating" style="width: 100%; padding: 12px; background: #5B5BED; color: #FFF; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 12px;">
+          {{ generating ? '生成中...' : '🔗 生成邀请链接' }}
+        </button>
+        <div v-else style="margin-bottom: 12px;">
+          <p style="font-size: 12px; color: #71717A; margin-bottom: 6px;">复制链接发送给候选人：</p>
+          <div style="display: flex; gap: 8px;">
+            <input :value="inviteLink" readonly style="flex:1;padding:10px 12px;border:1.5px solid #10B981;border-radius:8px;font-size:13px;color:#059669;background:#F0FDF4;" @focus="$event.target.select()" />
+            <button @click="copyInviteLink" style="padding: 10px 16px; background: #10B981; color: #FFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;">{{ copied ? '已复制' : '复制' }}</button>
+          </div>
+        </div>
+
+        <button @click="inviteModal = false" style="width: 100%; padding: 10px; border: 1px solid #E8E8ED; border-radius: 8px; background: #FFF; font-size: 14px; color: #71717A; cursor: pointer;">关闭</button>
       </div>
     </div>
   </div>
@@ -105,6 +126,28 @@ const deleteJob = async (id) => {
     await $api.delete(`/jobs/${id}`)
     await fetchJobs()
   } catch (e) { alert('删除失败') }
+}
+
+// 邀请功能
+const inviteModal = ref(false)
+const inviteJob = ref<any>(null)
+const inviteLink = ref('')
+const generating = ref(false)
+const copied = ref(false)
+
+const openInviteModal = (job: any) => { inviteJob.value = job; inviteLink.value = ''; inviteModal.value = true }
+const generateInvite = async () => {
+  generating.value = true
+  try {
+    const res = await $api.post(`/jobs/${inviteJob.value.id}/invite`)
+    inviteLink.value = window.location.origin + res.data.data.url
+  } catch (e) { alert('生成失败') }
+  finally { generating.value = false }
+}
+const copyInviteLink = async () => {
+  await navigator.clipboard.writeText(inviteLink.value)
+  copied.value = true
+  setTimeout(() => { copied.value = false }, 2000)
 }
 
 onMounted(fetchJobs)
