@@ -4,7 +4,7 @@
     <header class="app-header">
       <div class="header-left">
         <span class="logo">🤖</span>
-        <span class="title">AI 面试系统</span>
+        <span class="title">AI 面试陪练</span>
       </div>
       <div class="header-right">
         <span>管理员</span>
@@ -17,16 +17,13 @@
       <aside class="sidebar">
         <nav>
           <NuxtLink to="/" class="menu-item" :class="{ active: $route.path === '/' }">
-            <span>📊</span> 主界面
+            <span>🏠</span> 首页
           </NuxtLink>
           <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }">
-            <span>📋</span> 岗位管理
-          </NuxtLink>
-          <NuxtLink to="/candidates" class="menu-item" :class="{ active: $route.path.startsWith('/candidates') }">
-            <span>👥</span> 候选人管理
+            <span>🎯</span> 目标岗位
           </NuxtLink>
           <NuxtLink to="/interviews" class="menu-item" :class="{ active: $route.path.startsWith('/interviews') }">
-            <span>🎯</span> 面试记录
+            <span>📝</span> 练习记录
           </NuxtLink>
         </nav>
       </aside>

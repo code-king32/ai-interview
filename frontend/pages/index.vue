@@ -1,61 +1,69 @@
 <template>
-  <div>
-    <div class="welcome-section">
-      <h1>欢迎使用 AI 面试系统</h1>
-      <p>您好，管理员</p>
+  <div style="max-width: 900px; margin: 0 auto;">
+    <!-- Hero -->
+    <div style="text-align: center; padding: 40px 0 32px;">
+      <div style="font-size: 44px; margin-bottom: 12px;">🤖</div>
+      <h1 style="font-size: 28px; font-weight: 700; color: #18181B; letter-spacing: -0.025em; margin-bottom: 8px;">AI 面试陪练</h1>
+      <p style="font-size: 15px; color: #71717A; max-width: 500px; margin: 0 auto; line-height: 1.7;">
+        模拟真实技术面试，根据目标岗位和你的简历，AI 面试官针对性提问、评分并给出改进建议。
+      </p>
     </div>
 
-    <!-- 统计卡片：4列网格 -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-info">
-          <div class="stat-label">岗位数量</div>
-          <div class="stat-number">{{ jobCount }}</div>
-        </div>
-        <div class="stat-icon">📋</div>
+    <!-- 快捷开始 -->
+    <div style="background: linear-gradient(135deg, #5B5BED, #7C3AED); border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; color: #FFF; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 8px 32px rgba(91,91,237,0.25);">
+      <div>
+        <div style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">开始一场模拟面试</div>
+        <div style="font-size: 13px; opacity: 0.85;">粘贴目标岗位 JD，上传你的简历，AI 将模拟真实技术面试</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-info">
-          <div class="stat-label">候选人</div>
-          <div class="stat-number">{{ candidateCount }}</div>
-        </div>
-        <div class="stat-icon">👥</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-info">
-          <div class="stat-label">面试场次</div>
-          <div class="stat-number">{{ interviewCount }}</div>
-        </div>
-        <div class="stat-icon">🎯</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-info">
-          <div class="stat-label">平均评分</div>
-          <div class="stat-number">{{ avgScore }}</div>
-        </div>
-        <div class="stat-icon">⭐</div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <NuxtLink to="/interviews/create" style="background: #FFF; color: #5B5BED; padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          🚀 快速开始
+        </NuxtLink>
+        <NuxtLink to="/jobs" style="background: rgba(255,255,255,0.15); color: #FFF; padding: 12px 24px; border-radius: 10px; font-weight: 500; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.25);">
+          管理目标岗位 →
+        </NuxtLink>
       </div>
     </div>
 
-    <!-- 功能卡片 -->
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">📋</div>
-        <h3>岗位管理</h3>
-        <p>创建和管理面试岗位，定义技术要求</p>
-        <NuxtLink to="/jobs" class="feature-link">去管理 →</NuxtLink>
+    <!-- 统计数据 -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px;">
+      <div v-for="s in stats" :key="s.label" style="background: #FFF; border: 1px solid #F0F0F3; border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+        <div style="font-size: 12px; color: #A1A1AA; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; margin-bottom: 8px;">{{ s.label }}</div>
+        <div style="display: flex; align-items: baseline; gap: 6px;">
+          <span style="font-size: 32px; font-weight: 700; color: #18181B; letter-spacing: -0.02em;">{{ s.value }}</span>
+          <span v-if="s.unit" style="font-size: 13px; color: #A1A1AA;">{{ s.unit }}</span>
+        </div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">👥</div>
-        <h3>候选人管理</h3>
-        <p>管理候选人信息，上传简历文档</p>
-        <NuxtLink to="/candidates" class="feature-link">去管理 →</NuxtLink>
+    </div>
+
+    <!-- 最近练习 -->
+    <div style="background: #FFF; border: 1px solid #F0F0F3; border-radius: 16px; padding: 24px 28px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h2 style="font-size: 17px; font-weight: 600; color: #18181B;">最近练习</h2>
+        <NuxtLink to="/interviews" style="font-size: 13px; color: #5B5BED; text-decoration: none; font-weight: 500;">查看全部 →</NuxtLink>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎯</div>
-        <h3>面试记录</h3>
-        <p>查看面试历史，获取详细报告</p>
-        <NuxtLink to="/interviews" class="feature-link">去查看 →</NuxtLink>
+      <div v-if="!recent.length" style="text-align: center; padding: 40px; color: #A1A1AA;">
+        <div style="font-size: 36px; margin-bottom: 10px;">📝</div>
+        <p style="font-size: 14px;">还没有练习记录</p>
+        <NuxtLink to="/interviews/create" style="color: #5B5BED; font-size: 13px; font-weight: 500; margin-top: 6px; display: inline-block;">开始第一次模拟面试</NuxtLink>
+      </div>
+      <div v-else style="display: flex; flex-direction: column; gap: 8px;">
+        <div v-for="iv in recent" :key="iv.id" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #F5F5F7; border-radius: 10px; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+            <span :style="statusDot(normalize(iv.status))" style="width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;"></span>
+            <div style="min-width: 0;">
+              <div style="font-size: 14px; font-weight: 500; color: #18181B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ iv.job_title || '岗位 #'+iv.job_id }}</div>
+              <div style="font-size: 12px; color: #A1A1AA;">{{ fmtDate(iv.created_at) }}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <span :style="statusBadge(normalize(iv.status))" style="padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;">{{ statusLabel(normalize(iv.status)) }}</span>
+            <span v-if="iv.overall_score" style="font-size: 14px; font-weight: 700; color: #5B5BED;">{{ scoreAvg(iv.overall_score) }}</span>
+            <NuxtLink :to="normalize(iv.status)==='completed'?`/reports/${iv.id}`:`/interviews/${iv.id}`" style="font-size: 12px; color: #5B5BED; text-decoration: none; font-weight: 500; flex-shrink: 0;">
+              {{ normalize(iv.status)==='completed'?'报告':'继续' }}
+            </NuxtLink>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -63,138 +71,41 @@
 
 <script setup lang="ts">
 const { $api } = useNuxtApp()
+const recent = ref<any[]>([])
+const stats = ref<any[]>([
+  { label: '练习次数', value: 0, unit: '次' },
+  { label: '平均得分', value: '-', unit: '分' },
+  { label: '目标岗位', value: 0, unit: '个' },
+  { label: '待改进维度', value: '-', unit: '' },
+])
 
-const jobCount = ref(0)
-const candidateCount = ref(0)
-const interviewCount = ref(0)
-const avgScore = ref('0')
+const normalize = (s: string) => String(s || '').toLowerCase()
+const statusDot = (s: string) => ({completed:{background:'#10B981'},in_progress:{background:'#5B5BED'},pending:{background:'#F59E0B'}})[s] || {background:'#D1D5DB'}
+const statusBadge = (s: string) => ({completed:{background:'#D1FAE5',color:'#065F46'},in_progress:{background:'#DBEAFE',color:'#1E40AF'},pending:{background:'#FED7AA',color:'#9A3412'}})[s] || {}
+const statusLabel = (s: string) => ({completed:'已完成',in_progress:'进行中',pending:'待开始'} as Record<string,string>)[s]||s
+const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString('zh-CN') : '-'
+const scoreAvg = (s: any) => {
+  if (typeof s === 'object') {
+    const dims = ['technical','communication','learning','match']
+    const vals = dims.map((d: string) => Number(s[d])||0).filter((v: number) => v > 0)
+    return vals.length ? (vals.reduce((a: number,b: number) => a+b,0)/vals.length).toFixed(1) : '-'
+  }
+  return Number(s).toFixed(1)
+}
 
-const fetchStats = async () => {
+onMounted(async () => {
   try {
-    const [jobsRes, candRes, intRes] = await Promise.all([
-      $api.get('/jobs'),
-      $api.get('/candidates'),
-      $api.get('/interviews'),
-    ])
-    const jobs: any[] = jobsRes.data.data || []
-    const cands: any[] = candRes.data.data || []
+    const [intRes, jobRes] = await Promise.all([$api.get('/interviews'), $api.get('/jobs')])
     const ints: any[] = intRes.data.data || []
-
-    jobCount.value = jobs.length
-    candidateCount.value = cands.length
-    interviewCount.value = ints.length
-
+    const jobs: any[] = jobRes.data.data || []
+    stats.value[0].value = ints.length
+    stats.value[2].value = jobs.length
     const scored = ints.filter((i: any) => i.overall_score)
     if (scored.length) {
-      const total = scored.reduce((sum: number, i: any) => {
-        const s = i.overall_score
-        if (typeof s === 'object') {
-          const dims = ['technical','communication','learning','match']
-          const vals = dims.map(d => Number(s[d]) || 0).filter(v => v > 0)
-          return sum + (vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : 0)
-        }
-        return sum + (Number(s) || 0)
-      }, 0)
-      avgScore.value = (total / scored.length).toFixed(1)
-    } else {
-      avgScore.value = '-'
+      const avg = scored.reduce((sum: number, i: any) => sum + Number(scoreAvg(i.overall_score)), 0) / scored.length
+      stats.value[1].value = avg.toFixed(1)
     }
-  } catch (e) {
-    console.error('获取统计数据失败', e)
-  }
-}
-
-onMounted(fetchStats)
+    recent.value = ints.slice(0, 5).reverse()
+  } catch (e) { console.error(e) }
+})
 </script>
-
-<style scoped>
-.welcome-section {
-  margin-bottom: 28px;
-}
-.welcome-section h1 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1f2937;
-}
-.welcome-section p {
-  color: #6b7280;
-  margin-top: 4px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin-bottom: 40px;
-}
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-left: 4px solid #3b82f6;
-}
-.stat-card .stat-label {
-  color: #6b7280;
-  font-size: 14px;
-}
-.stat-card .stat-number {
-  font-size: 28px;
-  font-weight: bold;
-  color: #1f2937;
-}
-.stat-card .stat-icon {
-  font-size: 32px;
-}
-
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-.feature-card {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transition: 0.2s;
-}
-.feature-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-.feature-icon {
-  width: 48px;
-  height: 48px;
-  background: #eff6ff;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  margin-bottom: 16px;
-}
-.feature-card h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #1f2937;
-}
-.feature-card p {
-  color: #6b7280;
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 16px;
-}
-.feature-link {
-  color: #3b82f6;
-  text-decoration: none;
-  font-size: 14px;
-}
-.feature-link:hover {
-  text-decoration: underline;
-}
-</style>

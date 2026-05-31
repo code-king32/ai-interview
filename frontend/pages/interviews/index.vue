@@ -1,11 +1,11 @@
 <template>
   <div style="background: white; border-radius: 12px; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); padding: 24px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-      <h1 style="font-size: 24px; font-weight: bold; color: #1f2937;">面试记录</h1>
+      <h1 style="font-size: 24px; font-weight: bold; color: #1f2937;">练习记录</h1>
       <NuxtLink to="/interviews/create" style="text-decoration:none">
         <button style="background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; font-size: 16px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg>
-          添加面试
+          开始练习
         </button>
       </NuxtLink>
     </div>
@@ -17,8 +17,8 @@
         <thead style="background-color: #f9fafb;">
           <tr>
             <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">ID</th>
-            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">岗位</th>
-            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">候选人</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">目标岗位</th>
+            <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">练习者</th>
             <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">状态</th>
             <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">评分</th>
             <th style="padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 500; color: #6b7280;">时间</th>
@@ -28,8 +28,8 @@
         <tbody>
           <tr v-for="iv in interviews" :key="iv.id" style="border-bottom: 1px solid #e5e7eb;">
             <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #111827;">{{ iv.id }}</td>
-            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px;font-weight:500;color:#111827;">{{ iv.job_title || '岗位#'+iv.job_id }}</td>
-            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #6b7280;">{{ iv.candidate_name || '候选人#'+iv.candidate_id }}</td>
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px;font-weight:500;color:#111827;">{{ iv.job_title || '目标岗位#'+iv.job_id }}</td>
+            <td style="padding: 20px 24px; white-space: nowrap; font-size: 14px; color: #6b7280;">{{ iv.candidate_name || '练习者#'+iv.candidate_id }}</td>
             <td style="padding: 20px 24px; white-space: nowrap;">
               <span :style="statusStyle(normalizeStatus(iv.status))" style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;">
                 {{ statusLabel(normalizeStatus(iv.status)) }}
@@ -47,7 +47,7 @@
             </td>
           </tr>
           <tr v-if="interviews.length === 0">
-            <td colspan="7" style="padding:32px;text-align:center;color:#6b7280;">暂无面试记录</td>
+            <td colspan="7" style="padding:32px;text-align:center;color:#6b7280;">暂无练习记录</td>
           </tr>
         </tbody>
       </table>
@@ -99,11 +99,11 @@ const deleteInterview = async (iv: any) => {
   }
 }
 
-// 同样加给岗位和候选人的删除
+// 同样加给目标岗位和练习者的删除
 const deleteJob = async (id: number) => {
-  if (!confirm('确定删除该岗位吗？')) return
+  if (!confirm('确定删除该目标岗位吗？')) return
   try { await $api.delete(`/jobs/${id}`); await fetchInterviews() }
-  catch (e: any) { alert('删除岗位失败：' + (e?.response?.data?.detail || e?.message || '未知错误')) }
+  catch (e: any) { alert('删除目标岗位失败：' + (e?.response?.data?.detail || e?.message || '未知错误')) }
 }
 
 onMounted(fetchInterviews)
