@@ -10,12 +10,15 @@ export default defineNuxtPlugin(() => {
 
   // 请求拦截器：自动附加 role 参数
   api.interceptors.request.use((reqConfig) => {
-    if (typeof window !== 'undefined') {
-      const role = localStorage.getItem('role')
-      if (role && reqConfig.url && !reqConfig.url.startsWith('/api/auth') && !reqConfig.url.startsWith('/api/invite')) {
-        const sep = reqConfig.url.includes('?') ? '&' : '?'
-        reqConfig.url = `${reqConfig.url}${sep}role=${role}`
+    let role = ''
+    try {
+      if (typeof window !== 'undefined') {
+        role = localStorage.getItem('role') || ''
       }
+    } catch (e) {}
+    if (role && reqConfig.url && !reqConfig.url!.startsWith('/api/auth') && !reqConfig.url!.startsWith('/api/invite')) {
+      const sep = reqConfig.url!.includes('?') ? '&' : '?'
+      reqConfig.url = `${reqConfig.url}${sep}role=${role}`
     }
     return reqConfig
   })
