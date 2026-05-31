@@ -84,7 +84,6 @@ const submit = async () => {
     }
     const r = await $api.post('/auth/login', { username: u, password: p })
     const user = r.data.data
-    // 最简单：角色跟 URL 走
     localStorage.setItem('role', user.role)
     localStorage.setItem('token', 'ok')
     window.location.href = `/?role=${user.role}`
