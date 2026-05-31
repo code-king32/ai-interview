@@ -48,18 +48,25 @@
 
 <script setup lang="ts">
 const router = useRouter()
+const isHR = ref(false)
 
-const getRole = () => {
-  if (typeof window === 'undefined') return ''
-  let r = localStorage.getItem('role') || ''
-  if (!r) { const m = document.cookie.match(/(?:^|;\s*)role=([^;]*)/); r = m ? m[1] : '' }
-  return r
+// 客户端读取真实角色
+const syncRole = () => {
+  if (typeof window === 'undefined') return
+  const r = localStorage.getItem('role') || ''
+  isHR.value = r === 'hr'
 }
-const isHR = computed(() => getRole() === 'hr')
+
+onMounted(syncRole)
+// 监听 storage 变化（多标签页场景）
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', syncRole)
+}
 
 const logout = () => {
   localStorage.clear()
   document.cookie = 'role=;path=/;max-age=0'
+  isHR.value = false
   router.push('/login')
 }
 </script>

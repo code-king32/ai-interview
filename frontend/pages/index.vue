@@ -91,13 +91,8 @@ const recent = ref<any[]>([])
 const hrStats = ref<any[]>([])
 const skStats = ref<any[]>([])
 
-const getRole = () => {
-  if (typeof window === 'undefined') return ''
-  let r = localStorage.getItem('role') || ''
-  if (!r) { const m = document.cookie.match(/(?:^|;\s*)role=([^;]*)/); r = m ? m[1] : '' }
-  return r
-}
-const isHR = computed(() => getRole() === 'hr')
+const isHR = ref(false)
+onMounted(() => { isHR.value = (localStorage.getItem('role') || '') === 'hr' })
 
 const normalize = (s: string) => String(s || '').toLowerCase()
 const statusDot = (s: string) => ({completed:{background:'#10B981'},in_progress:{background:'#5B5BED'},pending:{background:'#F59E0B'}})[s]||{background:'#D1D5DB'}
