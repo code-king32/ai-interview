@@ -84,6 +84,11 @@ const submit = async () => {
     }
     const r = await $api.post('/auth/login', { username: u, password: p })
     const user = r.data.data
+    if (user.role !== role.value) {
+      error.value = `该账号是「${user.role === 'hr' ? '面试官/HR' : '求职者'}」账号，请切换身份后登录`
+      loading.value = false
+      return
+    }
     localStorage.setItem('role', user.role)
     localStorage.setItem('token', 'ok')
     window.location.href = `/?role=${user.role}`
