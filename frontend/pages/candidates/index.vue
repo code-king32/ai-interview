@@ -54,10 +54,17 @@
           <input v-model="form.email" placeholder="邮箱" style="border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px;" />
           <input v-model="form.phone" placeholder="电话" style="border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px;" />
           <textarea v-model="form.resume_text" rows="3" placeholder="简历摘要" style="border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px;"></textarea>
+          <div>
+            <label style="display:block;font-size:14px;font-weight:500;color:#374151;margin-bottom:6px">上传简历（PDF / Word / TXT）</label>
+            <input ref="fileInput" type="file" accept=".pdf,.docx,.doc,.txt" @change="handleFileChange"
+              style="border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 12px; width: 100%;" />
+            <p v-if="selectedFile" style="font-size:12px;color:#10B981;margin-top:4px">已选择: {{ selectedFile.name }}</p>
+            <p v-if="form.resume_text" style="font-size:12px;color:#6B7280;margin-top:4px">已解析简历文本 ({{ form.resume_text.length }}字)</p>
+          </div>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
           <button @click="closeModal" style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 8px;">取消</button>
-          <button @click="submitForm" style="background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; border: none;">保存</button>
+          <button @click="submitForm" :disabled="uploading" style="background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor:pointer" :style="{opacity: uploading?0.6:1}">{{ uploading ? '上传中…' : '保存' }}</button>
         </div>
       </div>
     </div>
@@ -71,6 +78,9 @@ const candidates = ref<any[]>([])
 const modalVisible = ref(false)
 const isEdit = ref(false)
 const form = ref<any>({ id: null, name: '', email: '', phone: '', resume_text: '' })
+const selectedFile = ref<File | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+const uploading = ref(false)
 
 const fetchCandidates = async () => {
   try {
@@ -82,39 +92,54 @@ const fetchCandidates = async () => {
 const openCreateModal = () => {
   isEdit.value = false
   form.value = { id: null, name: '', email: '', phone: '', resume_text: '' }
+  selectedFile.value = null
   modalVisible.value = true
 }
 
 const openEditModal = (candidate: any) => {
   isEdit.value = true
   form.value = { ...candidate }
+  selectedFile.value = null
   modalVisible.value = true
 }
 
 const closeModal = () => { modalVisible.value = false }
 
+const handleFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  selectedFile.value = target.files?.[0] || null
+}
+
 const submitForm = async () => {
   if (!form.value.name.trim()) return alert('请填写姓名')
+  uploading.value = true
   try {
+    let candidateId = form.value.id
     if (isEdit.value) {
-      await $api.put(`/candidates/${form.value.id}`, { name: form.value.name, email: form.value.email, phone: form.value.phone })
+      await $api.put(`/candidates/${candidateId}`, { name: form.value.name, email: form.value.email, phone: form.value.phone })
     } else {
       const body: any = { name: form.value.name }
       if (form.value.email) body.email = form.value.email
       if (form.value.phone) body.phone = form.value.phone
-      await $api.post('/candidates', body)
+      const res = await $api.post('/candidates', body)
+      candidateId = res.data.data.id
+    }
+    // 上传简历文件
+    if (selectedFile.value && candidateId) {
+      const fd = new FormData()
+      fd.append('file', selectedFile.value)
+      await $api.post(`/candidates/upload-resume/${candidateId}`, fd)
     }
     closeModal()
     await fetchCandidates()
-  } catch (e) { alert('操作失败，请确保后端服务已启动') }
+  } catch (e) { alert('操作失败') }
+  finally { uploading.value = false }
 }
 
-const deleteCandidate = async (id) => {
+const deleteCandidate = async (id: number) => {
   if (!confirm('确定删除该候选人吗？')) return
-  try {
-    await $api.delete(`/candidates/${id}`)
-    await fetchCandidates()
-  } catch (e) { alert('删除失败') }
+  try { await $api.delete(`/candidates/${id}`); await fetchCandidates() }
+  catch (e) { alert('删除失败') }
 }
 
 onMounted(fetchCandidates)
