@@ -114,6 +114,8 @@ const handleSubmit = async () => {
     localStorage.setItem('role', user.role)
     localStorage.setItem('token', 'ok')
     localStorage.setItem('user', JSON.stringify({ id: user.id, username: user.username }))
+    // 同时写 cookie 供 SSR 读取
+    document.cookie = `role=${user.role};path=/;max-age=86400`
     router.push('/')
   } catch (e: any) {
     error.value = e?.response?.data?.detail || '请求失败'

@@ -16,6 +16,11 @@ export default defineNuxtPlugin(() => {
         role = localStorage.getItem('role') || ''
       }
     } catch (e) {}
+    // SSR 回退：从 cookie 读取
+    if (!role && typeof document !== 'undefined') {
+      const match = document.cookie.match(/(?:^|;\s*)role=([^;]*)/)
+      role = match ? match[1] : ''
+    }
     if (role && reqConfig.url && !reqConfig.url!.startsWith('/api/auth') && !reqConfig.url!.startsWith('/api/invite')) {
       const sep = reqConfig.url!.includes('?') ? '&' : '?'
       reqConfig.url = `${reqConfig.url}${sep}role=${role}`

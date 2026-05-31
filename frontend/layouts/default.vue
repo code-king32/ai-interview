@@ -51,13 +51,19 @@ const router = useRouter()
 const isHR = ref(false)
 
 onMounted(() => {
-  isHR.value = localStorage.getItem('role') === 'hr'
+  let role = localStorage.getItem('role') || ''
+  if (!role) {
+    const m = document.cookie.match(/(?:^|;\s*)role=([^;]*)/)
+    role = m ? m[1] : ''
+  }
+  isHR.value = role === 'hr'
 })
 
 const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   localStorage.removeItem('role')
+  document.cookie = 'role=;path=/;max-age=0'
   router.push('/login')
 }
 </script>
