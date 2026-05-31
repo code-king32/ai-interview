@@ -29,23 +29,12 @@ export default defineNuxtPlugin(() => {
     return reqConfig
   })
 
-  // 响应拦截器：统一包装为 { code, message, data }
+  // 响应拦截器：不再包装，直接透传
   api.interceptors.response.use(
     (response) => {
-      // 204 No Content 直接返回
       if (response.status === 204) {
         response.data = { code: 0, message: 'success', data: null }
-        return response
       }
-      // auth 接口自身已返回 {code, data}，跳过包装
-      const url = response.config.url || ''
-      if (url.includes('/auth/')) return response
-      // 空响应
-      if (!response.data) {
-        response.data = { code: 0, message: 'success', data: null }
-        return response
-      }
-      response.data = { code: 0, message: 'success', data: response.data }
       return response
     },
     (error) => {

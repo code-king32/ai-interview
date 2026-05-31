@@ -86,11 +86,18 @@ const submit = async () => {
       }
     }
     const r = await $api.post('/auth/login', { username: u, password: p })
-    if (r.status !== 200) { error.value = '登录失败'; loading.value = false; return }
-    // 使用表单选择的角色
-    localStorage.setItem('role', role.value)
+    // auth 返回 {code, data: {username, role}}
+    const user = r.data?.data || r.data
+    console.log('user:', user)
+    if (!user?.role) { error.value = '登录失败'; loading.value = false; return }
+    if (user.role !== role.value) {
+      error.value = `该账号是「${user.role === 'hr' ? '面试官/HR' : '求职者'}」账号，请切换身份后登录`
+      loading.value = false
+      return
+    }
+    localStorage.setItem('role', user.role)
     localStorage.setItem('token', 'ok')
-    window.location.href = `/?role=${role.value}`
+    window.location.href = `/?role=${user.role}`
   } catch (e: any) {
     error.value = e?.response?.data?.detail || '请求失败'
     console.error(e)

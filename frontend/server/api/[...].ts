@@ -1,8 +1,16 @@
 export default defineEventHandler(async (event) => {
-  const target = 'http://localhost:8000/api' + event.path.replace('/api', '')
-  const body = event.method !== 'GET' ? await readRawBody(event) : undefined
+  const path = event.path.replace(/^\/api/, '')
+  const query = getQuery(event)
+  const qs = Object.entries(query).length > 0
+    ? '?' + new URLSearchParams(query as Record<string, string>).toString()
+    : ''
+  const target = `http://localhost:8000/api${path}${qs}`
 
   try {
+    const body = event.method !== 'GET' && event.method !== 'HEAD'
+      ? await readRawBody(event)
+      : undefined
+
     const response = await fetch(target, {
       method: event.method,
       headers: {
@@ -12,14 +20,19 @@ export default defineEventHandler(async (event) => {
       body,
     })
 
-    const contentType = response.headers.get('content-type') || ''
-    const data = contentType.includes('application/json')
-      ? await response.json()
-      : await response.text()
-
+    const text = await response.text()
     setResponseStatus(event, response.status)
-    setResponseHeaders(event, Object.fromEntries(response.headers.entries()))
-    return data
+
+    const ct = response.headers.get('content-type') || ''
+    if (ct.includes('application/json')) {
+      setHeader(event, 'content-type', 'application/json')
+      return JSON.parse(text)
+    }
+    if (ct.includes('text/event-stream')) {
+      setHeader(event, 'content-type', 'text/event-stream')
+      return text
+    }
+    return text
   } catch (e) {
     setResponseStatus(event, 502)
     return { detail: 'Backend unavailable' }
