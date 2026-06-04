@@ -19,10 +19,14 @@ def create_job(job: JobCreate, role: str = "seeker", db: Session = Depends(get_d
 
 @router.get("/", response_model=List[JobResponse])
 def get_jobs(role: str = "seeker", db: Session = Depends(get_db)):
-    jobs = db.query(Job).filter(Job.source == role).all()
-    if not jobs:
-        jobs = db.query(Job).all()
-    return jobs
+    # 求职者可以看到所有岗位（用于选择练习目标），HR 只看自己的
+    if role == "hr":
+        jobs = db.query(Job).filter(Job.source == "hr").all()
+        if not jobs:
+            jobs = db.query(Job).all()
+        return jobs
+    # 求职者看到全部岗位
+    return db.query(Job).all()
 
 @router.get("/{job_id}", response_model=JobResponse)
 def get_job(job_id: int, db: Session = Depends(get_db)):
