@@ -4,7 +4,7 @@ from typing import Optional
 
 class CandidateBase(BaseModel):
     name: str
-    email: EmailStr
+    email: Optional[str] = None
     phone: Optional[str] = None
     resume_text: Optional[str] = None
     resume_file_path: Optional[str] = None
@@ -14,7 +14,7 @@ class CandidateCreate(CandidateBase):
 
 class CandidateUpdate(BaseModel):
     name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     phone: Optional[str] = None
     resume_text: Optional[str] = None
     resume_file_path: Optional[str] = None
