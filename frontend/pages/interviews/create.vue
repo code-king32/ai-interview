@@ -53,7 +53,7 @@ const fileInput = ref<HTMLInputElement>()
 const selectedJob = computed(() => jobs.value.find(j => j.id === Number(selectedJobId.value)))
 
 const fetchJobs = async () => {
-  try { const data = (await $api.get('/jobs')).data; jobs.value = Array.isArray(data) ? data : [] }
+  try { const data = (await $api.get('/jobs')).data; console.log('jobs data:', data); jobs.value = Array.isArray(data) ? data : []; console.log('jobs loaded:', jobs.value.length) }
   catch (err) { alert('无法连接后端服务') }
 }
 
