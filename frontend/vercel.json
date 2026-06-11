@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".output/public",
+  "buildCommand": "npx nuxi build",
   "framework": "nuxtjs",
   "installCommand": "npm install --registry=https://registry.npmmirror.com"
 }
