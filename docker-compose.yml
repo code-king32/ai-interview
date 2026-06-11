@@ -1,23 +1,37 @@
-version: "3.8"
+version: '3.8'
 
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-interview-backend
     ports:
       - "8000:8000"
+    env_file:
+      - ./backend/.env
     volumes:
-      - ./backend:/app
       - ./backend/uploads:/app/uploads
-    environment:
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - DATABASE_URL=sqlite:///./interview.db
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      - sqlite_data:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      retries: 3
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        API_BASE: http://backend:8000/api
+    container_name: ai-interview-frontend
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:

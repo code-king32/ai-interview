@@ -273,4 +273,16 @@ onMounted(load)
 .fin-icon { font-size: 40px; margin-bottom: 12px }
 .fin-state h3 { font-size: 16px; font-weight: 600; color: #18181B; margin-bottom: 4px }
 .fin-state p { font-size: 13px; color: #71717A }
+
+@media (max-width: 640px) {
+  .int-hdr { padding: 0 16px; height: 48px }
+  .int-prog { font-size: 12px }
+  .chat-scroll { padding: 20px 16px }
+  .chat-feed { gap: 20px }
+  .msg-row { max-width: 88% }
+  .int-foot { padding: 12px 16px 16px }
+  .int-input-box { padding: 6px 6px 6px 14px }
+  .int-input-box textarea { font-size: 14px }
+  .kbd-hint { display: none }
+}
 </style>
