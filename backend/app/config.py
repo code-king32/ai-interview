@@ -14,6 +14,9 @@ class Settings:
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
     ALLOWED_RESUME_EXTENSIONS: set = field(default_factory=lambda: {".pdf", ".docx", ".doc", ".txt"})
     DEFAULT_QUESTION_COUNT: int = 7
+    # PostgreSQL: export DATABASE_URL="postgresql://user:pass@localhost:5432/interview"
+    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
+    DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
 
 
 settings = Settings()

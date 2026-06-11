@@ -22,6 +22,10 @@ def verify_password(password: str, stored: str) -> bool:
 
 @router.post("/register")
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
+    if len(req.username.strip()) < 2:
+        raise HTTPException(status_code=400, detail="用户名至少 2 个字符")
+    if len(req.password) < 4:
+        raise HTTPException(status_code=400, detail="密码至少 4 个字符")
     if db.query(User).filter(User.username == req.username).first():
         raise HTTPException(status_code=400, detail="用户名已存在")
     if req.role not in ("seeker", "hr"):
