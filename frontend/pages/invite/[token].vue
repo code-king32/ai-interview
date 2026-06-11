@@ -95,7 +95,9 @@ const startInterview = async () => {
     // 设置角色并跳转面试页
     localStorage.setItem('role', 'seeker')
     localStorage.setItem('token', 'ok')
-    window.location.href = `/interviews/${iid}?role=seeker`
+    document.cookie = 'role=seeker;path=/;max-age=86400;SameSite=Lax'
+    document.cookie = 'token=invite;path=/;max-age=86400;SameSite=Lax'
+    window.location.href = `/interviews/${iid}`
   } catch (e: any) {
     error.value = e?.response?.data?.detail || '启动面试失败'
     if (error.value.includes('已被使用')) step.value = 'error'
