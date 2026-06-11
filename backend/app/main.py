@@ -11,6 +11,10 @@ from app.routers import jobs_router, candidates_router, interviews_router, repor
 from app.services.prompt_manager import seed_prompts
 from app.database import SessionLocal
 from app.middleware.auth_middleware import AuthMiddleware
+from app.middleware.logging_middleware import LoggingMiddleware
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s %(message)s")
 
 
 @asynccontextmanager
@@ -26,6 +30,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="AI 智能面试系统", version="1.0.0", lifespan=lifespan)
 
+app.add_middleware(LoggingMiddleware)
 app.add_middleware(AuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
