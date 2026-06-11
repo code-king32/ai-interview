@@ -1,3 +1,6 @@
+[build]
+  publish = "dist/public"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
