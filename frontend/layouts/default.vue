@@ -23,6 +23,7 @@
             <NuxtLink to="/jobs" class="menu-item" :class="{ active: $route.path.startsWith('/jobs') }"><span>🎯</span> 目标岗位</NuxtLink>
           </template>
           <NuxtLink to="/interviews" class="menu-item" :class="{ active: $route.path.startsWith('/interviews') }"><span>{{ isHR ? '🎯' : '📝' }}</span> {{ isHR ? '面试记录' : '练习记录' }}</NuxtLink>
+          <NuxtLink to="/analytics" class="menu-item" :class="{ active: $route.path === '/analytics' }"><span>📊</span> AI 评估</NuxtLink>
         </nav>
       </aside>
       <main class="main-content"><slot /></main>
