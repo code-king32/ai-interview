@@ -24,15 +24,20 @@ def overview(db: Session = Depends(get_db)):
     ai_messages = db.query(Message).filter(Message.role == MessageRole.INTERVIEWER).count()
     avg_messages_per_interview = round(total_messages / max(total_interviews, 1), 1)
 
-    # 平均评分
+    # 平均评分（合并消息评分 + 数据集评分）
     avg_scores = {"correctness": 0, "depth": 0, "logic": 0, "practice": 0}
-    scored_msgs = db.query(Message).filter(
-        Message.scores.isnot(None),
-        Message.role == MessageRole.INTERVIEWER,
-    ).all()
-    if scored_msgs:
+    all_scores = []
+    # 从消息获取
+    for m in db.query(Message).filter(Message.scores.isnot(None), Message.role == MessageRole.INTERVIEWER).all():
+        if m.scores:
+            all_scores.append(m.scores)
+    # 从数据集获取
+    for r in db.query(InterviewDataset).filter(InterviewDataset.scores.isnot(None)).all():
+        if r.scores:
+            all_scores.append(r.scores)
+    if all_scores:
         for d in avg_scores:
-            vals = [m.scores.get(d, 0) for m in scored_msgs if m.scores and d in m.scores]
+            vals = [s.get(d, 0) for s in all_scores if d in s]
             avg_scores[d] = round(sum(vals) / len(vals), 1) if vals else 0
 
     return {
