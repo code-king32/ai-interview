@@ -35,19 +35,23 @@
 const route = useRoute()
 const router = useRouter()
 
-// 角色来源：URL > localStorage
+// 角色来源：Cookie > localStorage
 const role = computed(() => {
-  const urlRole = route.query.role as string
-  if (urlRole) { localStorage.setItem('role', urlRole); return urlRole }
-  if (typeof window !== 'undefined') return localStorage.getItem('role') || ''
-  return ''
+  if (typeof window === 'undefined') return ''
+  const cookies = document.cookie.split(';').reduce((acc, c) => { const [k,v] = c.trim().split('='); if(k&&v) acc[k]=v; return acc; }, {} as Record<string,string>)
+  return cookies['role'] || localStorage.getItem('role') || ''
 })
 const isHR = computed(() => role.value === 'hr')
 
 // 没角色跳登录
 watchEffect(() => { if (role.value === '' && route.path !== '/login') { router.push('/login') } })
 
-const logout = () => { localStorage.clear(); router.push('/login') }
+const logout = () => {
+  localStorage.clear()
+  document.cookie = 'role=;path=/;max-age=0'
+  document.cookie = 'token=;path=/;max-age=0'
+  router.push('/login')
+}
 </script>
 
 <style scoped>

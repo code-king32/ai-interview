@@ -96,8 +96,10 @@ const submit = async () => {
       return
     }
     localStorage.setItem('role', user.role)
-    localStorage.setItem('token', 'ok')
-    window.location.href = `/?role=${user.role}`
+    localStorage.setItem('token', user.id + ':' + user.role)
+    document.cookie = `role=${user.role};path=/;max-age=86400;SameSite=Lax`
+    document.cookie = `token=${user.id}:${user.role};path=/;max-age=86400;SameSite=Lax`
+    window.location.href = '/'
   } catch (e: any) {
     error.value = e?.response?.data?.detail || '请求失败'
     console.error(e)

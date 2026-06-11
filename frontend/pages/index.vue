@@ -91,8 +91,11 @@ const recent = ref<any[]>([])
 const hrStats = ref<any[]>([])
 const skStats = ref<any[]>([])
 
-const route = useRoute()
-const isHR = computed(() => (route.query.role as string) === 'hr' || localStorage.getItem('role') === 'hr')
+const isHR = computed(() => {
+  if (typeof window === 'undefined') return false
+  const cookies = document.cookie.split(';').reduce((acc, c) => { const [k,v] = c.trim().split('='); if(k&&v) acc[k]=v; return acc; }, {} as Record<string,string>)
+  return (cookies['role'] || localStorage.getItem('role') || '') === 'hr'
+})
 
 const normalize = (s: string) => String(s || '').toLowerCase()
 const statusDot = (s: string) => ({completed:{background:'#10B981'},in_progress:{background:'#5B5BED'},pending:{background:'#F59E0B'}})[s]||{background:'#D1D5DB'}
