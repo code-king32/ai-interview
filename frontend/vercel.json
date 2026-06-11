@@ -1,5 +1,9 @@
 {
-  "buildCommand": "npx nuxi generate",
+  "buildCommand": "npx nuxi generate && cp .output/public/404.html .output/public/404/index.html 2>/dev/null; echo done",
   "outputDirectory": ".output/public",
-  "installCommand": "npm install --registry=https://registry.npmmirror.com"
+  "installCommand": "npm install --registry=https://registry.npmmirror.com",
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
