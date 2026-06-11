@@ -6,3 +6,4 @@ from app.models.user import User
 from app.models.invite import InviteToken
 from app.models.prompt_version import PromptVersion
 from app.models.interview_dataset import InterviewDataset
+from app.models.interview_metrics import InterviewMetrics

@@ -99,6 +99,33 @@ def export_dataset(db: Session = Depends(get_db)):
     }
 
 
+@router.get("/analytics/dataset/export-finetune")
+def export_finetune(db: Session = Depends(get_db)):
+    """导出 JSONL 格式数据集，适配 OpenAI 微调。"""
+    records = db.query(InterviewDataset).order_by(InterviewDataset.created_at.desc()).limit(500).all()
+
+    lines = []
+    for r in records:
+        entry = {
+            "messages": [
+                {"role": "system", "content": f"你是技术面试评分专家。请对以下回答进行评分。岗位：{r.job_title}，话题：{r.topic}"},
+                {"role": "user", "content": f"问题：{r.question}\n回答：{r.answer}"},
+                {"role": "assistant", "content": str(r.scores) if r.scores else '{"correctness":0,"depth":0,"logic":0,"practice":0}'},
+            ]
+        }
+        lines.append(entry)
+
+    return {
+        "code": 0,
+        "data": {
+            "format": "jsonl",
+            "total": len(lines),
+            "sample": lines[:3],
+            "export_url": "/api/analytics/dataset/export",
+        },
+    }
+
+
 @router.get("/analytics/dataset/stats")
 def dataset_stats(db: Session = Depends(get_db)):
     """面试数据集统计。"""

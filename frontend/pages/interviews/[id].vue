@@ -159,7 +159,10 @@ const sendMessage = async (content: string) => {
       const fb = await $api.post('/interviews/chat-v2', { interview_id: interviewId.value, message: content })
       full = fb.data.assistant_response || ''; scores = fb.data.scores; mid = fb.data.message_id
       streamText.value = full
-    } catch (e2) { console.error(e2) }
+    } catch (e2: any) {
+      const detail = e2?.response?.data?.detail || e2?.message || '未知错误'
+      chatMessages.value.push({ id: Date.now()+1, role: 'INTERVIEWER', content: '⚠️ AI 响应失败：' + detail + '。请稍后重试。', scores: null, created_at: new Date().toISOString() })
+    }
   } finally { streaming.value = false; loading.value = false }
   if (full) {
     chatMessages.value.push({ id: mid || Date.now() + 1, role: 'INTERVIEWER', content: full, scores, created_at: new Date().toISOString() })
