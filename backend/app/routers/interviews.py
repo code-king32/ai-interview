@@ -123,6 +123,16 @@ async def chat_v2(chat_request: ChatRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
 
 
+@router.post("/{interview_id}/end-v2")
+async def end_interview_v2(interview_id: int, db: Session = Depends(get_db)):
+    """基于 Agent 的报告生成。"""
+    service = AgentInterviewService(db)
+    try:
+        return await service.end_interview(interview_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.post("/{interview_id}/end")
 async def end_interview(interview_id: int, db: Session = Depends(get_db)):
     """结束面试，生成综合评分报告。"""

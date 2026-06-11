@@ -3,6 +3,7 @@
 集成了知识库增强 + 数据采集。
 """
 import json
+import asyncio
 from typing import AsyncGenerator
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -13,6 +14,7 @@ from ..models.interview import InterviewStatus
 from ..models.message import Message, MessageRole
 from ..models.interview_dataset import InterviewDataset
 from ..agents.orchestrator import InterviewOrchestrator, InterviewSession
+from ..services.knowledge_service import KnowledgeBase
 from ..services.knowledge_service import KnowledgeBase
 
 
@@ -156,6 +158,77 @@ class AgentInterviewService:
             "message_id": ai_msg.id,
             "scores": scores,
         }
+
+    async def end_interview(self, interview_id: int) -> dict:
+        """结束面试，生成 Agent 报告。"""
+        interview = self._get_interview(interview_id)
+        if interview.status == InterviewStatus.COMPLETED:
+            return {"code": 0, "message": "面试已结束", "data": interview.overall_score}
+
+        job = self._get_job(interview.job_id)
+        candidate = self._get_candidate(interview.candidate_id)
+        messages = self._get_messages(interview_id)
+
+        # 构建 QA 记录
+        qa_records = []
+        scores_list = []
+        for m in messages:
+            if m.role == MessageRole.INTERVIEWER and m.question_number:
+                answer = ""
+                for m2 in messages:
+                    if m2.role == MessageRole.CANDIDATE and m2.question_number == m.question_number:
+                        answer = m2.content
+                        break
+                qa_records.append(f"Q{m.question_number}: {m.content}\nA: {answer[:500]}")
+                if m.scores:
+                    scores_list.append(m.scores)
+
+        duration = "约30分钟"
+        if interview.started_at:
+            minutes = int((datetime.utcnow() - interview.started_at).total_seconds() // 60)
+            duration = f"约{max(1, minutes)}分钟"
+
+        session = InterviewSession(
+            job_title=job.title,
+            job_requirements=job.requirements or "",
+            candidate_name=candidate.name,
+            resume_text=candidate.resume_text or "",
+        )
+        for s in scores_list:
+            session.scored_questions.append(s)
+        for m in messages:
+            if m.role == MessageRole.INTERVIEWER and m.question_number:
+                a = ""
+                for m2 in messages:
+                    if m2.role == MessageRole.CANDIDATE and m2.question_number == m.question_number:
+                        a = m2.content
+                        break
+                session.qa_history.append({"question": m.content, "answer": a, "topic": m.scores.get("topic","") if m.scores else ""})
+
+        report = await self.orchestrator.generate_report(session)
+
+        interview.overall_score = report
+        interview.status = InterviewStatus.COMPLETED
+        interview.completed_at = datetime.utcnow()
+        self.db.commit()
+
+        return {"code": 0, "message": "success", "data": report}
+
+    async def process_chat_stream(self, interview_id: int, candidate_message: str) -> AsyncGenerator[str, None]:
+        """SSE 流式处理：基于 Agent 编排。"""
+        try:
+            result = await self.process_chat(interview_id, candidate_message)
+            content = result.get("assistant_response", "")
+            # 模拟流式输出
+            for i, char in enumerate(content):
+                chunk = content[max(0, i-2):i+3]
+                yield f"data: {json.dumps({'type':'token','content':chunk})}\n\n"
+                await asyncio.sleep(0.02)
+            if result.get("scores"):
+                yield f"data: {json.dumps({'type':'scores','question_number':0,'scores':result['scores']})}\n\n"
+            yield f"data: {json.dumps({'type':'done','message_id':result.get('message_id',0),'content':content})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'type':'error','message':str(e)})}\n\n"
 
     def _collect_dataset(self, iid: int, job_title: str, question: str, answer: str, topic: str, scores: dict, prompt_ver: str):
         """采集 Q&A 数据到数据集。"""

@@ -175,7 +175,7 @@ const sendMessage = async (content: string) => {
 
 const endInterview = async () => {
   if (!confirm('确定要结束本次面试吗？AI 将生成评估报告。')) return
-  try { await $api.post(`/interviews/${interviewId.value}/end`); interviewStatus.value = 'COMPLETED'; await navigateTo(`/reports/${interviewId.value}`) }
+  try { await $api.post(`/interviews/${interviewId.value}/end-v2`); interviewStatus.value = 'COMPLETED'; await navigateTo(`/reports/${interviewId.value}`) }
   catch (e: any) { alert('结束失败：' + (e?.response?.data?.detail || '请重试')) }
 }
 
