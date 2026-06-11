@@ -6,12 +6,19 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routers import jobs_router, candidates_router, interviews_router, reports_router, auth_router, invite_router, analytics_router
+from app.routers import jobs_router, candidates_router, interviews_router, reports_router, auth_router, invite_router, analytics_router, prompts_router
+from app.services.prompt_manager import seed_prompts
+from app.database import SessionLocal
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        seed_prompts(db)
+    finally:
+        db.close()
     yield
 
 
@@ -32,6 +39,7 @@ app.include_router(reports_router, prefix="/api/reports", tags=["面试报告"])
 app.include_router(auth_router, prefix="/api/auth", tags=["用户认证"])
 app.include_router(invite_router, prefix="/api", tags=["候选人邀请"])
 app.include_router(analytics_router, prefix="/api", tags=["数据分析"])
+app.include_router(prompts_router, prefix="/api", tags=["Prompt管理"])
 
 
 @app.get("/api/health")
