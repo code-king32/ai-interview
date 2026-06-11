@@ -7,5 +7,6 @@ from app.routers.invite import router as invite_router
 from app.routers.analytics import router as analytics_router
 from app.routers.prompts import router as prompts_router
 from app.routers.dev import router as dev_router
+from app.routers.export import router as export_router
 
-__all__ = ["jobs_router", "candidates_router", "interviews_router", "reports_router", "auth_router", "invite_router", "analytics_router", "prompts_router", "dev_router"]
+__all__ = ["jobs_router", "candidates_router", "interviews_router", "reports_router", "auth_router", "invite_router", "analytics_router", "prompts_router", "dev_router", "export_router"]
