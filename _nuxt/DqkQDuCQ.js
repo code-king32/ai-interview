@@ -1,0 +1,1 @@
+import{_ as s,y as t,f as r,D as n}from"./YjscK3Qd.js";const o={},c={class:"interview-shell"};function a(e,l){return t(),r("div",c,[n(e.$slots,"default")])}const i=s(o,[["render",a]]);export{i as default};
